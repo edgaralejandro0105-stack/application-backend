@@ -1,25 +1,34 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const { Sequelize } = require('sequelize');
+require('dotenv').config(); // Carga las variables del .env
 
-// El Pool de conexiones es más eficiente para múltiples peticiones
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 5432,
-});
+const sequelize = new Sequelize(
+  process.env.DB_NAME, 
+  process.env.DB_USER, 
+  process.env.DB_PASSWORD, 
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: 'postgres', // Le decimos específicamente que hablamos con PostgreSQL
+    logging: false,      // Ponlo en 'true' si quieres ver el SQL que Sequelize genera en la consola
+    pool: {
+      max: 5,            // Máximo de conexiones simultáneas
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  }
+);
 
-// Verificación de conexión
-pool.on('connect', () => {
-  console.log('✅ Conexión exitosa a la base de datos Postgres');
-});
-
-pool.on('error', (err) => {
-  console.error('❌ Error inesperado en la base de datos', err);
-  process.exit(-1);
-});
-
-module.exports = {
-  query: (text, params) => pool.query(text, params),
+// Función técnica para probar la conexión
+const testConnection = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Conexión a PostgreSQL establecida con éxito.');
+  } catch (error) {
+    console.error('❌ No se pudo conectar a la base de datos:', error);
+  }
 };
+
+testConnection();
+
+module.exports = sequelize;
