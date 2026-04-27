@@ -1,6 +1,23 @@
 const Client = require('../models/Client.model');
 
-// 1. Obtener un cliente por su ID
+exports.createClient = async (req, res) => {
+  try {
+    const client = await Client.create(req.body);
+    res.status(201).json({ message: 'Cliente creado correctamente', data: client });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.getAllClients = async (req, res) => {
+  try {
+    const clients = await Client.findAll();
+    res.status(200).json(clients);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.getClientById = async (req, res) => {
     try {
         const client = await Client.findByPk(req.params.id);
@@ -13,15 +30,13 @@ exports.getClientById = async (req, res) => {
     }
 };
 
-// 2. Actualizar datos de un cliente
 exports.updateClient = async (req, res) => {
     try {
         const client = await Client.findByPk(req.params.id);
         if (!client) {
             return res.status(404).json({ message: "Cliente no encontrado" });
         }
-        
-        await client.update(req.body); // Sequelize detecta qué campos cambiaron
+        await client.update(req.body);
         res.status(200).json({
             message: "Cliente actualizado correctamente",
             data: client
@@ -31,15 +46,13 @@ exports.updateClient = async (req, res) => {
     }
 };
 
-// 3. Eliminar un cliente
 exports.deleteClient = async (req, res) => {
     try {
         const client = await Client.findByPk(req.params.id);
         if (!client) {
             return res.status(404).json({ message: "Cliente no encontrado" });
         }
-        
-        await client.destroy(); // Esto borra el registro de la tabla
+        await client.destroy();
         res.status(200).json({ message: "Cliente eliminado de la base de datos" });
     } catch (error) {
         res.status(500).json({ message: error.message });
