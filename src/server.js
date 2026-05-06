@@ -4,14 +4,24 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
-// 1. IMPORTA LA CONEXIÓN A LA DB Y LOS MODELOS
+//models
 const sequelize = require('./config/db');
 const Client = require('./models/Client.model');
 const User = require('./models/User.model');
 const Role = require('./models/Role.model');
-// (Importa el resto de tus modelos aquí para que Sequelize los sincronice)
+const Employee = require('./models/Employee.model');
+const Event = require('./models/Event.model');
+const EventItem = require('./models/EventItem.model');
+const EventStaff = require('./models/EventStaff.model');
+const InventoryBar = require('./models/InventoryBar.model');
+const Payment = require('./models/Paymet.model');
+const Product = require('./models/Product.model');
+const Sale = require('./models/Sale.model');
+const SaleDetail = require('./models/SaleDetail.model');
+const ServiceExternal = require('./models/ServiceExternal.model');
+const Venue = require('./models/Venue.model');
 
-// 2. IMPORTA LAS RUTAS
+//  RUTAS
 const authRoutes = require('./routes/auth.routes');
 const clientRoutes = require('./routes/client.routes');
 const employeesRoutes = require('./routes/employees.routes');
@@ -53,7 +63,7 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.json({ message: "Backend API Eventos Francisco - Activo" });
+    res.json({ message: "Backend  Eventos Francisco - Activo" });
 });
 
 app.use(notFound);
@@ -62,12 +72,10 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 
 // 2. SINCRONIZACIÓN Y ARRANQUE
-// Usamos una función asíncrona para asegurar que la DB esté lista antes que el servidor
 async function startServer() {
     try {
         // Sincroniza los modelos con la base de datos
-        // force: true elimina y recrea las tablas (útil para desarrollo)
-        await sequelize.sync({ force: true });
+        await sequelize.sync(); 
         console.log('✅ Base de datos sincronizada exitosamente');
 
         app.listen(PORT, () => {
