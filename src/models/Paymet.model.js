@@ -14,20 +14,15 @@ const Payment = db.define('Payment', {
     allowNull: true, // Puede ser nulo si el pago es directo a un evento
     references: { model: Sale, key: 'sale_id' }
   },
-  event_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true, // Puede ser nulo si es una venta rápida de bar
-    references: { model: Event, key: 'event_id' }
-  },
   amount: {
-    type: DataTypes.DECIMAL(12, 2),
+    type: DataTypes.DECIMAL,
     allowNull: false
   },
-  pay_method: {
-    type: DataTypes.ENUM('Cash', 'Card', 'Transfer'),
+  method: {
+    type: DataTypes.ENUM('Zelle', 'Efectivo', 'Transferencia', 'Punto de Venta', 'Pago Móvil'),
     allowNull: false
   },
-  payment_date: {
+  date: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   }

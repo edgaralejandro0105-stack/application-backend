@@ -17,27 +17,25 @@ const Event = db.define('Event', {
     type: DataTypes.INTEGER,
     references: { model: Venue, key: 'venue_id' }
   },
-  event_date: {
-    type: DataTypes.DATEONLY, // Solo fecha, sin hora, para evitar líos de zona horaria
+  start_date: {
+    type: DataTypes.DATE, 
     allowNull: false
   },
-  event_type: {
-    type: DataTypes.STRING(30), // Boda, Corporativo, Cumpleaños...
+  end_date: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  type_event: {
+    type: DataTypes.STRING(20),
     allowNull: false
   },
   status: {
-    type: DataTypes.ENUM('Lead', 'Confirmed', 'Finished', 'Cancelled'),
-    defaultValue: 'Lead'
-  },
-  total_budget: {
-    type: DataTypes.DECIMAL(12, 2),
-    defaultValue: 0.00
+    type: DataTypes.ENUM('Confirmed', 'Pending', 'On Hold', 'Cancelled'),
+    defaultValue: 'Pending'
   }
 }, {
   tableName: 'events',
-  timestamps: true,
-  createdAt: 'create_at',
-  updatedAt: 'update_at'
+  timestamps: false // Tu SQL no define columnas de tiempo para esta tabla
 });
 
 // Relaciones

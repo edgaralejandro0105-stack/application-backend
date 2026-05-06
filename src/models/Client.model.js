@@ -23,18 +23,12 @@ const Client = db.define('Client', {
   phone: {
     type: DataTypes.STRING(11),
   },
-  email: {
-    type: DataTypes.STRING(50),
-    validate: {
-      isEmail: true, // ¡Magia de Sequelize! Valida que tenga formato correo@dominio.com antes de guardar
-    },
-  },
   direction: {
     type: DataTypes.STRING(80),
   }
 }, {
   // Configuraciones adicionales del modelo
-  tableName: 'clients', // Forzamos el nombre exacto de tu tabla
+  tableName: 'clients', // Forzamos el nombre exacto de tu tabla en minúsculas
   timestamps: true,     // Activa la creación automática de fechas
   createdAt: 'created_at', // Mapeamos al nombre exacto que pusiste en tu diagrama
   updatedAt: 'update_at'

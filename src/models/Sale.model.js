@@ -8,16 +8,18 @@ const Sale = db.define('Sale', {
     primaryKey: true,
     autoIncrement: true
   },
-  user_id: {
-    type: DataTypes.INTEGER,
-    references: { model: User, key: 'user_id' }
+  event_id: {
+    type: DataTypes.INTEGER
   },
-  total_price: {
-    type: DataTypes.DECIMAL(12, 2),
+  employee_id: {
+    type: DataTypes.INTEGER
+  },
+  total: {
+    type: DataTypes.DECIMAL,
     allowNull: false,
     defaultValue: 0.00
   },
-  sale_date: {
+  create_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   }

@@ -30,7 +30,7 @@ const User = db.define('User', {
     allowNull: false
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive'), // Usamos el Enum de tu diagrama
+    type: DataTypes.ENUM('active', 'inactive', 'suspended'),
     defaultValue: 'active'
   }
 }, {

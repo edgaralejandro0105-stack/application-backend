@@ -24,19 +24,16 @@ const InventoryBar = db.define('InventoryBar', {
     }
   },
   movement_type: {
-    type: DataTypes.ENUM('Purchase', 'Sale', 'Adjustment'),
+    type: DataTypes.ENUM('Entry', 'Exit', 'Adjustment'),
     allowNull: false
   },
   quantity: {
-    type: DataTypes.DECIMAL(10, 2), // Usamos decimal para manejar medios kilos o litros
+    type: DataTypes.DECIMAL,
     allowNull: false
   },
   unit_price: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL,
     allowNull: true // Puede ser nulo en caso de ajustes de inventario
-  },
-  notes: {
-    type: DataTypes.TEXT
   },
   date: {
     type: DataTypes.DATE,

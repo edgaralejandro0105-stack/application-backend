@@ -18,7 +18,7 @@ const Venue = db.define('Venue', {
     // y la validación de límite se hace en el controlador.
   },
   status: {
-    type: DataTypes.ENUM('Available', 'Occupied', 'Maintenance'),
+    type: DataTypes.ENUM('Available', 'Occupied', 'Maintenance', 'Reserved'),
     defaultValue: 'Available'
   }
 }, {

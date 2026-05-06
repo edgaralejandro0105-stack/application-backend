@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/db');
 const Sale = require('./Sale.model');
-const Product = require('./Product.model');
 
 const SaleDetail = db.define('SaleDetail', {
   detail_id: {
@@ -13,16 +12,12 @@ const SaleDetail = db.define('SaleDetail', {
     type: DataTypes.INTEGER,
     references: { model: Sale, key: 'sale_id' }
   },
-  product_id: {
-    type: DataTypes.INTEGER,
-    references: { model: Product, key: 'product_id' }
-  },
   quantity: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DECIMAL,
     allowNull: false
   },
-  price_at_sale: {
-    type: DataTypes.DECIMAL(10, 2),
+  subtotal: {
+    type: DataTypes.DECIMAL,
     allowNull: false // Guardamos el precio del momento por si luego cambia en el catálogo
   }
 }, {
@@ -31,6 +26,5 @@ const SaleDetail = db.define('SaleDetail', {
 });
 
 SaleDetail.belongsTo(Sale, { foreignKey: 'sale_id' });
-SaleDetail.belongsTo(Product, { foreignKey: 'product_id' });
 
 module.exports = SaleDetail;

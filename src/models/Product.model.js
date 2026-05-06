@@ -8,16 +8,19 @@ const Product = db.define('Product', {
     autoIncrement: true
   },
   name: {
-    type: DataTypes.STRING(20),
+    type: DataTypes.STRING(50),
     allowNull: false
   },
   category: {
-    type: DataTypes.STRING(10), // Ej: Bebida, Comida, Insumo
+    type: DataTypes.STRING(50),
     allowNull: false
   },
   measurement_unit: {
-    type: DataTypes.STRING(10), // Ej: Unidad, Litro, Kg
+    type: DataTypes.STRING(50),
     allowNull: false
+  },
+  expiry_date: {
+    type: DataTypes.DATEONLY
   }
 }, {
   tableName: 'products',

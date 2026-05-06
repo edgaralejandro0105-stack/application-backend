@@ -33,8 +33,11 @@ const Employee = db.define('Employee', {
     unique: true,
     validate: { isEmail: true }
   },
+  rol: {
+    type: DataTypes.STRING
+  },
   status: {
-    type: DataTypes.ENUM('active', 'inactive'),
+    type: DataTypes.ENUM('active', 'inactive', 'suspended'),
     defaultValue: 'active'
   }
 }, {
