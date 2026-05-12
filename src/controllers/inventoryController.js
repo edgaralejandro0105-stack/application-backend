@@ -1,57 +1,27 @@
-const InventoryBar = require('../models/InventoryBar.model');
+const inventoryService = require('../services/inventory.service');
+const catchAsync = require('../utils/catchAsync');
 
-exports.createInventoryItem = async (req, res) => {
-  try {
-    const item = await InventoryBar.create(req.body);
-    res.status(201).json({ message: 'Registro de inventario creado', data: item });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+exports.createInventoryItem = catchAsync(async (req, res) => {
+  const item = await inventoryService.createInventoryItem(req.body);
+  res.status(201).json({ message: 'Registro de inventario creado', data: item });
+});
 
-exports.getAllInventoryItems = async (req, res) => {
-  try {
-    const items = await InventoryBar.findAll();
-    res.status(200).json(items);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getAllInventoryItems = catchAsync(async (req, res) => {
+  const result = await inventoryService.getAllInventoryItems(req.query);
+  res.status(200).json(result);
+});
 
-exports.getInventoryItemById = async (req, res) => {
-  try {
-    const item = await InventoryBar.findByPk(req.params.id);
-    if (!item) {
-      return res.status(404).json({ message: 'Registro de inventario no encontrado' });
-    }
-    res.status(200).json(item);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getInventoryItemById = catchAsync(async (req, res) => {
+  const item = await inventoryService.getInventoryItemById(req.params.id);
+  res.status(200).json(item);
+});
 
-exports.updateInventoryItem = async (req, res) => {
-  try {
-    const item = await InventoryBar.findByPk(req.params.id);
-    if (!item) {
-      return res.status(404).json({ message: 'Registro de inventario no encontrado' });
-    }
-    await item.update(req.body);
-    res.status(200).json({ message: 'Registro de inventario actualizado', data: item });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+exports.updateInventoryItem = catchAsync(async (req, res) => {
+  const item = await inventoryService.updateInventoryItem(req.params.id, req.body);
+  res.status(200).json({ message: 'Registro de inventario actualizado', data: item });
+});
 
-exports.deleteInventoryItem = async (req, res) => {
-  try {
-    const item = await InventoryBar.findByPk(req.params.id);
-    if (!item) {
-      return res.status(404).json({ message: 'Registro de inventario no encontrado' });
-    }
-    await item.destroy();
-    res.status(200).json({ message: 'Registro de inventario eliminado' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.deleteInventoryItem = catchAsync(async (req, res) => {
+  await inventoryService.deleteInventoryItem(req.params.id);
+  res.status(200).json({ message: 'Registro de inventario eliminado' });
+});

@@ -35,7 +35,7 @@ const Event = db.define('Event', {
   }
 }, {
   tableName: 'events',
-  timestamps: false // Tu SQL no define columnas de tiempo para esta tabla
+  timestamps: false
 });
 
 // Relaciones

@@ -1,19 +1,19 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User.model');
-const Role = require('../models/Role.model');
+const AppError = require('../utils/AppError');
+const { User, Role } = require('../models');
 
 const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization || req.headers.Authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Token no proporcionado' });
+      return next(new AppError('Token no proporcionado. Por favor inicie sesión.', 401));
     }
 
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
 
     if (!decoded || !decoded.id) {
-      return res.status(401).json({ message: 'Token inválido' });
+      return next(new AppError('Token inválido.', 401));
     }
 
     const user = await User.findByPk(decoded.id, {
@@ -21,29 +21,36 @@ const verifyToken = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'Usuario no encontrado' });
+      return next(new AppError('El usuario que pertenece a este token ya no existe.', 401));
     }
 
     req.user = user;
     next();
   } catch (error) {
-    console.error('authMiddleware.verifyToken error:', error);
-    return res.status(401).json({ message: 'Error de autenticación', error: error.message });
+    if (error.name === 'JsonWebTokenError') {
+      return next(new AppError('Token inválido. Inicie sesión nuevamente.', 401));
+    }
+    if (error.name === 'TokenExpiredError') {
+      return next(new AppError('Su token ha expirado. Inicie sesión nuevamente.', 401));
+    }
+    next(error);
   }
 };
 
-const requireAdmin = (req, res, next) => {
-  const role = req.user?.Role || req.user?.role;
-  const accessLevel = role?.access ?? 0;
+const requireRoles = (...roles) => {
+  return (req, res, next) => {
+    // Si la función se llama sin roles específicos, requiere acceso de admin como fallback.
+    const userRole = req.user?.Role?.name || '';
+    
+    if (!roles.includes(userRole) && req.user?.Role?.access < 3) {
+      return next(new AppError('No tiene permisos para realizar esta acción.', 403));
+    }
 
-  if (accessLevel < 3) {
-    return res.status(403).json({ message: 'Acceso denegado: solo administradores' });
-  }
-
-  next();
+    next();
+  };
 };
 
 module.exports = {
   verifyToken,
-  requireAdmin
+  requireRoles
 };

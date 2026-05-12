@@ -1,57 +1,28 @@
-const Product = require('../models/Product.model');
+const productService = require('../services/product.service');
+const catchAsync = require('../utils/catchAsync');
 
-exports.createProduct = async (req, res) => {
-  try {
-    const product = await Product.create(req.body);
-    res.status(201).json({ message: 'Producto creado correctamente', data: product });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+exports.createProduct = catchAsync(async (req, res) => {
+  const product = await productService.createProduct(req.body);
+  res.status(201).json({ message: 'Producto creado correctamente', data: product });
+});
 
-exports.getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.findAll();
-    res.status(200).json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getAllProducts = catchAsync(async (req, res) => {
+  const result = await productService.getAllProducts(req.query);
+  res.status(200).json(result);
+});
 
-exports.getProductById = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Producto no encontrado' });
-    }
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getProductById = catchAsync(async (req, res) => {
+  const product = await productService.getProductById(req.params.id);
+  res.status(200).json(product);
+});
 
-exports.updateProduct = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Producto no encontrado' });
-    }
-    await product.update(req.body);
-    res.status(200).json({ message: 'Producto actualizado', data: product });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+exports.updateProduct = catchAsync(async (req, res) => {
+  const product = await productService.updateProduct(req.params.id, req.body);
+  res.status(200).json({ message: 'Producto actualizado', data: product });
+});
 
-exports.deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Producto no encontrado' });
-    }
-    await product.destroy();
-    res.status(200).json({ message: 'Producto eliminado correctamente' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.deleteProduct = catchAsync(async (req, res) => {
+  await productService.deleteProduct(req.params.id);
+  res.status(200).json({ message: 'Producto eliminado correctamente' });
+});
+

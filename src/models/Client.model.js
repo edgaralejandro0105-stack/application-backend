@@ -1,15 +1,18 @@
+// Desestructuramos DataTypes de sequelize para definir si es STRING, INTEGER, etc.
 const { DataTypes } = require('sequelize');
 const db = require('../config/db'); // Importamos la conexión a la base de datos
 
+// Definimos el modelo 'Client' (la tabla clientes)
 const Client = db.define('Client', {
+  // Mapeo de la columna 'client_id' de tu base de datos
   client_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
+    type: DataTypes.INTEGER, // Tipo de dato Entero
+    primaryKey: true,        // Es la llave primaria (identificador único del registro)
     autoIncrement: true, // Fundamental para que se asigne solo al crear uno nuevo
   },
   name: {
     type: DataTypes.STRING(50), // Respetando el límite de tu diagrama
-    allowNull: false, // No podemos tener un cliente sin nombre
+    allowNull: false, // Regla vital: la BD rechazará el registro si este campo viene vacío (nulo)
   },
   last_name: {
     type: DataTypes.STRING(50),
@@ -17,20 +20,21 @@ const Client = db.define('Client', {
   },
   doc_id: {
     type: DataTypes.STRING,
-    unique: true, // Sequelize validará que no haya dos clientes con la misma cédula/documento
+    unique: true, // REGLA: No pueden existir dos clientes con el mismo número de documento
     allowNull: false,
   },
   phone: {
-    type: DataTypes.STRING(11),
+    type: DataTypes.STRING(11), // Limitamos el número a 11 caracteres máximo
   },
   direction: {
     type: DataTypes.STRING(80),
   }
 }, {
   // Configuraciones adicionales del modelo
-  tableName: 'clients', // Forzamos el nombre exacto de tu tabla en minúsculas
+  tableName: 'clients', // Forzamos el nombre exacto de tu tabla en Postgres (sensible a mayúsculas)
   timestamps: true,     // Activa la creación automática de fechas
-  createdAt: 'created_at', // Mapeamos al nombre exacto que pusiste en tu diagrama
+  // Traducimos los nombres que Sequelize crea por defecto (createdAt) a los que tú usaste en tu SQL
+  createdAt: 'created_at', 
   updatedAt: 'update_at'
 });
 

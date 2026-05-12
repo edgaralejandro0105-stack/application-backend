@@ -2,24 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-//models
-const sequelize = require('./config/db');
-const Client = require('./models/Client.model');
-const User = require('./models/User.model');
-const Role = require('./models/Role.model');
-const Employee = require('./models/Employee.model');
-const Event = require('./models/Event.model');
-const EventItem = require('./models/EventItem.model');
-const EventStaff = require('./models/EventStaff.model');
-const InventoryBar = require('./models/InventoryBar.model');
-const Payment = require('./models/Paymet.model');
-const Product = require('./models/Product.model');
-const Sale = require('./models/Sale.model');
-const SaleDetail = require('./models/SaleDetail.model');
-const ServiceExternal = require('./models/ServiceExternal.model');
-const Venue = require('./models/Venue.model');
+// Base de datos y Modelos centralizados
+const { sequelize } = require('./models');
+
 
 //  RUTAS
 const authRoutes = require('./routes/auth.routes');
@@ -40,11 +28,29 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // Limita cada IP a 100 peticiones por ventana de tiempo
+  message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo en 15 minutos.'
+});
+
 // Middlewares globales
 app.use(helmet());
-app.use(cors());
+
+// CORS Configurado para Vite
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // URL de Vite
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Aplicar rate limiter solo a la API
+app.use('/api', limiter);
 
 // Rutas de la API
 app.use('/api/auth', authRoutes);

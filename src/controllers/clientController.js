@@ -1,66 +1,28 @@
-const Client = require('../models/Client.model');
+const clientService = require('../services/client.service');
+const catchAsync = require('../utils/catchAsync');
 
-exports.createClient = async (req, res) => {
-  try {
-    const client = await Client.create(req.body);
-    res.status(201).json({ message: 'Cliente creado correctamente', data: client });
-  } catch (error) {
-    if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({ message: 'Ya existe un cliente registrado con ese documento de identidad.' });
-    }
-    res.status(500).json({ message: 'Error al crear el cliente.', error: error.message });
-  }
-};
+exports.createClient = catchAsync(async (req, res) => {
+  const client = await clientService.createClient(req.body);
+  res.status(201).json({ message: 'Cliente creado correctamente', data: client });
+});
 
-exports.getAllClients = async (req, res) => {
-  try {
-    const clients = await Client.findAll();
-    res.status(200).json(clients);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getAllClients = catchAsync(async (req, res) => {
+  const result = await clientService.getAllClients(req.query);
+  res.status(200).json(result);
+});
 
-exports.getClientById = async (req, res) => {
-    try {
-        const client = await Client.findByPk(req.params.id);
-        if (!client) {
-            return res.status(404).json({ message: "Cliente no encontrado" });
-        }
-        res.status(200).json(client);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+exports.getClientById = catchAsync(async (req, res) => {
+  const client = await clientService.getClientById(req.params.id);
+  res.status(200).json(client);
+});
 
-exports.updateClient = async (req, res) => {
-    try {
-        const client = await Client.findByPk(req.params.id);
-        if (!client) {
-            return res.status(404).json({ message: "Cliente no encontrado" });
-        }
-        await client.update(req.body);
-        res.status(200).json({
-            message: "Cliente actualizado correctamente",
-            data: client
-        });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+exports.updateClient = catchAsync(async (req, res) => {
+  const client = await clientService.updateClient(req.params.id, req.body);
+  res.status(200).json({ message: 'Cliente actualizado correctamente', data: client });
+});
 
-exports.deleteClient = async (req, res) => {
-    try {
-        const client = await Client.findByPk(req.params.id);
-        if (!client) {
-            return res.status(404).json({ message: "Cliente no encontrado" });
-        }
-        await client.destroy();
-        res.status(200).json({ message: "Cliente eliminado de la base de datos" });
-    } catch (error) {
-        if (error.name === 'SequelizeForeignKeyConstraintError') {
-            return res.status(409).json({ message: 'No se puede eliminar el cliente porque tiene eventos o facturas asociados.' });
-        }
-        res.status(500).json({ message: 'Error interno al intentar eliminar el cliente.', error: error.message });
-    }
-};
+exports.deleteClient = catchAsync(async (req, res) => {
+  await clientService.deleteClient(req.params.id);
+  res.status(200).json({ message: 'Cliente eliminado de la base de datos' });
+});
+

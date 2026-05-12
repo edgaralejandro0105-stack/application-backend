@@ -1,57 +1,27 @@
-const Venue = require('../models/Venue.model');
+const venueService = require('../services/venue.service');
+const catchAsync = require('../utils/catchAsync');
 
-exports.getAllVenues = async (req, res) => {
-  try {
-    const venues = await Venue.findAll();
-    res.status(200).json(venues);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getAllVenues = catchAsync(async (req, res) => {
+  const result = await venueService.getAllVenues(req.query);
+  res.status(200).json(result);
+});
 
-exports.createVenue = async (req, res) => {
-  try {
-    const venue = await Venue.create(req.body);
-    res.status(201).json({ message: 'Salón creado correctamente', data: venue });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+exports.createVenue = catchAsync(async (req, res) => {
+  const venue = await venueService.createVenue(req.body);
+  res.status(201).json({ message: 'Salón creado correctamente', data: venue });
+});
 
-exports.getVenueById = async (req, res) => {
-  try {
-    const venue = await Venue.findByPk(req.params.id);
-    if (!venue) {
-      return res.status(404).json({ message: 'Salón no encontrado' });
-    }
-    res.status(200).json(venue);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+exports.getVenueById = catchAsync(async (req, res) => {
+  const venue = await venueService.getVenueById(req.params.id);
+  res.status(200).json(venue);
+});
 
-exports.updateVenue = async (req, res) => {
-  try {
-    const venue = await Venue.findByPk(req.params.id);
-    if (!venue) {
-      return res.status(404).json({ message: 'Salón no encontrado' });
-    }
-    await venue.update(req.body);
-    res.status(200).json({ message: 'Salón actualizado correctamente', data: venue });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+exports.updateVenue = catchAsync(async (req, res) => {
+  const venue = await venueService.updateVenue(req.params.id, req.body);
+  res.status(200).json({ message: 'Salón actualizado correctamente', data: venue });
+});
 
-exports.deleteVenue = async (req, res) => {
-  try {
-    const venue = await Venue.findByPk(req.params.id);
-    if (!venue) {
-      return res.status(404).json({ message: 'Salón no encontrado' });
-    }
-    await venue.destroy();
-    res.status(200).json({ message: 'Salón eliminado correctamente' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error interno al intentar eliminar el salón.', error: error.message });
-  }
-};
+exports.deleteVenue = catchAsync(async (req, res) => {
+  await venueService.deleteVenue(req.params.id);
+  res.status(200).json({ message: 'Salón eliminado correctamente' });
+});
