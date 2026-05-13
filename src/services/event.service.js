@@ -20,7 +20,7 @@ class EventService {
     const result = await Event.findAndCountAll({
       where, limit, offset,
       include: EVENT_INCLUDE,
-      order: [['event_date', 'ASC']]
+      order: [['start_date', 'ASC']]
     });
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }

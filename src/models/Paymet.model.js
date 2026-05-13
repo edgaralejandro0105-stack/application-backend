@@ -14,6 +14,11 @@ const Payment = db.define('Payment', {
     allowNull: true, // Puede ser nulo si el pago es directo a un evento
     references: { model: Sale, key: 'sale_id' }
   },
+  event_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: Event, key: 'event_id' }
+  },
   amount: {
     type: DataTypes.DECIMAL,
     allowNull: false

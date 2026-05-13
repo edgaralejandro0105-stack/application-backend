@@ -13,15 +13,15 @@ class DashboardService {
     const [eventsConfirmedThisMonth, totalSalesThisWeek, activeClients, upcomingEvents, lowStockProducts] =
       await Promise.all([
         Event.count({
-          where: { status: 'Confirmed', event_date: { [Op.gte]: startMonth, [Op.lte]: now } }
+          where: { status: 'Confirmed', start_date: { [Op.gte]: startMonth, [Op.lte]: now } }
         }),
-        Sale.sum('total_price', {
-          where: { sale_date: { [Op.gte]: sevenDaysAgo, [Op.lte]: now } }
+        Sale.sum('total', {
+          where: { create_at: { [Op.gte]: sevenDaysAgo, [Op.lte]: now } }
         }),
         Client.count(),
         Event.findAll({
-          where: { event_date: { [Op.gte]: now, [Op.lte]: sevenDaysLater } },
-          order: [['event_date', 'ASC']],
+          where: { start_date: { [Op.gte]: now, [Op.lte]: sevenDaysLater } },
+          order: [['start_date', 'ASC']],
           limit: 10
         }),
         InventoryBar.findAll({

@@ -5,7 +5,7 @@ class UserService {
   async getAllUsers() {
     return await User.findAll({
       attributes: { exclude: ['password'] },
-      include: [{ model: Role, attributes: ['name', 'access'] }]
+      include: [{ model: Role, attributes: ['role_name', 'access'] }]
     });
   }
 

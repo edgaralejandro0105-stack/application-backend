@@ -1,11 +1,12 @@
 const { z } = require('zod');
 
 const createEventSchema = z.object({
-  // Asumiendo los campos de tu modelo Event
   client_id: z.number({ required_error: "El ID de cliente es obligatorio" }).int(),
   venue_id: z.number({ required_error: "El ID del salón es obligatorio" }).int(),
-  date: z.string({ required_error: "La fecha es obligatoria" }),
-  // Agrega otros campos como guests, status, etc. según los tengas en tu BD
+  start_date: z.string({ required_error: "La fecha de inicio es obligatoria" }),
+  end_date: z.string({ required_error: "La fecha de fin es obligatoria" }),
+  type_event: z.string({ required_error: "El tipo de evento es obligatorio" }).max(20),
+  status: z.enum(['Confirmed', 'Pending', 'On Hold', 'Cancelled']).optional()
 });
 
 module.exports = { createEventSchema };

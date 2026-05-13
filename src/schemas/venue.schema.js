@@ -1,10 +1,9 @@
 const { z } = require('zod');
 
 const createVenueSchema = z.object({
-  name: z.string({ required_error: 'El nombre del salón es requerido' }).max(100),
-  capacity: z.number({ required_error: 'La capacidad del salón es requerida' }).int().positive(),
-  address: z.string().max(200).optional(),
-  price_per_day: z.number().nonnegative().optional()
+  name: z.string({ required_error: 'El nombre del salón es requerido' }).max(50, 'El nombre no puede exceder 50 caracteres'),
+  capacity: z.number({ required_error: 'La capacidad del salón es requerida' }).int().positive('La capacidad debe ser mayor a 0'),
+  status: z.enum(['Available', 'Occupied', 'Maintenance', 'Reserved']).optional()
 });
 
 module.exports = { createVenueSchema };

@@ -40,7 +40,7 @@ const verifyToken = async (req, res, next) => {
 const requireRoles = (...roles) => {
   return (req, res, next) => {
     // Si la función se llama sin roles específicos, requiere acceso de admin como fallback.
-    const userRole = req.user?.Role?.name || '';
+    const userRole = req.user?.Role?.role_name || '';
     
     if (!roles.includes(userRole) && req.user?.Role?.access < 3) {
       return next(new AppError('No tiene permisos para realizar esta acción.', 403));

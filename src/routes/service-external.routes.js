@@ -5,8 +5,8 @@ const serviceExternalController = require('../controllers/serviceExternalControl
 // URL base: /api/service-external
 router.post('/', serviceExternalController.createServiceExternal);
 router.get('/', serviceExternalController.getAllServiceExternal);
-router.get('/:id', serviceExternalController.getServiceExternalById);
 router.get('/event/:eventId', serviceExternalController.getServicesByEvent);
+router.get('/:id', serviceExternalController.getServiceExternalById);
 router.put('/:id', serviceExternalController.updateServiceExternal);
 router.delete('/:id', serviceExternalController.deleteServiceExternal);
 

@@ -7,7 +7,7 @@ class ServiceExternalService {
   }
 
   async getAllServiceExternal() {
-    return await ServiceExternal.findAll({ order: [['create_at', 'DESC']] });
+    return await ServiceExternal.findAll({ order: [['service_id', 'DESC']] });
   }
 
   async getServiceExternalById(id) {

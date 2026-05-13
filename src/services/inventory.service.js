@@ -15,7 +15,7 @@ class InventoryService {
     const where = {};
     if (query.movement_type) where.movement_type = query.movement_type;
 
-    const result = await InventoryBar.findAndCountAll({ where, limit, offset, order: [['create_at', 'DESC']] });
+    const result = await InventoryBar.findAndCountAll({ where, limit, offset, order: [['date', 'DESC']] });
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 

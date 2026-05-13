@@ -20,7 +20,7 @@ class EmployeeService {
       ];
     }
 
-    const result = await Employee.findAndCountAll({ where, limit, offset, order: [['create_at', 'DESC']] });
+    const result = await Employee.findAndCountAll({ where, limit, offset, order: [['created_at', 'DESC']] });
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 

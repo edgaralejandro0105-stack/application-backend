@@ -1,7 +1,8 @@
 const AppError = require('../utils/AppError');
 
 const handleSequelizeUniqueConstraintError = (err) => {
-  const message = `Valor duplicado: ${err.errors[0].message}. Por favor use otro valor.`;
+  const detail = err.errors && err.errors[0] ? err.errors[0].message : 'valor duplicado';
+  const message = `Valor duplicado: ${detail}. Por favor use otro valor.`;
   return new AppError(message, 400);
 };
 
@@ -12,9 +13,15 @@ const handleSequelizeValidationError = (err) => {
 };
 
 const handleZodError = (err) => {
-  const errors = err.errors.map(e => e.message);
+  const errors = Array.isArray(err.errors) ? err.errors.map(e => e.message) : [err.message || 'error de validación'];
   const message = `Error de validación: ${errors.join(', ')}`;
   return new AppError(message, 400);
+};
+
+const handleSequelizeForeignKeyConstraintError = (err) => {
+  const table = err.parent && err.parent.table ? err.parent.table : 'otro registro';
+  const message = `No se puede eliminar este registro porque está referenciado en la tabla "${table}". Elimine los registros relacionados primero.`;
+  return new AppError(message, 409);
 };
 
 const notFound = (req, res, next) => {
@@ -32,6 +39,7 @@ const errorHandler = (err, req, res, next) => {
   if (error.name === 'SequelizeUniqueConstraintError') error = handleSequelizeUniqueConstraintError(error);
   if (error.name === 'SequelizeValidationError') error = handleSequelizeValidationError(error);
   if (error.name === 'ZodError') error = handleZodError(error);
+  if (error.name === 'SequelizeForeignKeyConstraintError') error = handleSequelizeForeignKeyConstraintError(error);
 
   // Modo desarrollo
   if (process.env.NODE_ENV === 'development') {

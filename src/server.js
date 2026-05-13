@@ -80,8 +80,35 @@ const PORT = process.env.PORT || 3000;
 // 2. SINCRONIZACIÓN Y ARRANQUE
 async function startServer() {
     try {
-        // Sincroniza los modelos con la base de datos
-        await sequelize.sync(); 
+        // ─── Fixes puntuales de columnas ───────────────────────────────────────
+        // 1. Rellenar timestamps NULL en todas las tablas (evita errores al insertar)
+        await sequelize.query(`
+            DO $$
+            DECLARE r RECORD;
+            BEGIN
+                FOR r IN
+                    SELECT table_name, column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND column_name IN ('create_at','update_at','created_at','updated_at')
+                LOOP
+                    EXECUTE format(
+                        'UPDATE %I SET %I = NOW() WHERE %I IS NULL',
+                        r.table_name, r.column_name, r.column_name
+                    );
+                END LOOP;
+            END $$;
+        `).catch(() => {});
+
+        // 2. Ampliar password a VARCHAR(255) para hashes SHA-256 de 64 chars
+        await sequelize.query(
+            `ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(255);`
+        ).catch(() => {});
+
+        // ─── Sincronización normal ─────────────────────────────────────────────
+        // sync() crea tablas que falten pero NO altera las existentes.
+        // Esto evita conflictos de ENUM entre tipos user_status y enum_users_status.
+        await sequelize.sync();
         console.log('✅ Base de datos sincronizada exitosamente');
 
         app.listen(PORT, () => {

@@ -5,8 +5,8 @@ const eventItemController = require('../controllers/eventItemController');
 // URL base: /api/event-items
 router.post('/', eventItemController.createEventItem);
 router.get('/', eventItemController.getAllEventItems);
-router.get('/:id', eventItemController.getEventItemById);
 router.get('/event/:eventId', eventItemController.getItemsByEvent);
+router.get('/:id', eventItemController.getEventItemById);
 router.put('/:id', eventItemController.updateEventItem);
 router.delete('/:id', eventItemController.deleteEventItem);
 
