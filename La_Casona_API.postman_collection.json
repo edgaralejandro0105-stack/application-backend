@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "La Casona API",
-		"description": "Colección de endpoints para probar el backend del sistema de eventos La Casona.",
+		"description": "Colección de endpoints para probar el backend del sistema de eventos La Casona. Implementa pruebas automatizadas y flujo seguro con variables.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -25,57 +25,220 @@
 			"response": []
 		},
 		{
-			"name": "Clients",
+			"name": "🔐 Auth",
 			"item": [
 				{
-					"name": "Obtener todos los Clientes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/clients",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"clients"
-							]
+					"name": "✅ Registro exitoso",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201 - Creado', () => {",
+									"  pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Respuesta contiene token', () => {",
+									"  const json = pm.response.json();",
+									"  pm.expect(json).to.have.property('token');",
+									"  pm.collectionVariables.set('token', json.token);",
+									"});",
+									"",
+									"pm.test('Respuesta contiene datos del usuario', () => {",
+									"  const json = pm.response.json();",
+									"  pm.expect(json.user).to.have.property('email');",
+									"  pm.expect(json.user).to.not.have.property('password');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "Obtener Cliente por ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/clients/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"clients",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Crear Cliente",
+					],
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Francisco\",\n    \"last_name\": \"García\",\n    \"doc_id\": \"V-99999999\",\n    \"phone\": \"04141112233\",\n    \"direction\": \"Calle Ficticia 123\"\n}"
+							"raw": "{\n  \"name\": \"Francisco Admin\",\n  \"email\": \"francisco@lacasona.com\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Login exitoso",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Respuesta contiene token', () => {",
+									"  const json = pm.response.json();",
+									"  pm.expect(json).to.have.property('token');",
+									"  pm.collectionVariables.set('token', json.token);",
+									"  console.log('✅ Token guardado:', json.token.substring(0, 30) + '...');",
+									"});",
+									"",
+									"pm.test('Usuario no expone la contraseña', () => {",
+									"  const json = pm.response.json();",
+									"  pm.expect(json.user).to.not.have.property('password');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"francisco@lacasona.com\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Ver perfil (con token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', () => {",
+									"  pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Recuperar contraseña",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"francisco@lacasona.com\",\n  \"newPassword\": \"nueva123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/recover-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"recover-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "1. Crear Cliente (POST)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201 - Creado', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test('Tiempo de respuesta < 500ms', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});",
+									"pm.test('Guardar ID del cliente en variable', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var id = jsonData.client_id || (jsonData.data && jsonData.data.client_id);",
+									"    pm.expect(id).to.not.be.undefined;",
+									"    pm.collectionVariables.set('test_client_id', id);",
+									"    console.log('✅ Cliente ID guardado:', id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cliente QA\",\n    \"last_name\": \"Test\",\n    \"doc_id\": \"V-{{$timestamp}}\",\n    \"phone\": \"04140000000\",\n    \"direction\": \"Entorno de pruebas\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/clients",
@@ -90,46 +253,198 @@
 					"response": []
 				},
 				{
-					"name": "Actualizar Cliente",
+					"name": "2. Obtener todos los Clientes (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "PUT",
+						"method": "GET",
 						"header": [
 							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"phone\": \"04120001122\",\n    \"direction\": \"Nueva dirección actualizada\"\n}"
-						},
 						"url": {
-							"raw": "{{base_url}}/clients/1",
+							"raw": "{{base_url}}/clients",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"clients",
-								"1"
+								"clients"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Eliminar Cliente",
+					"name": "3. Obtener Cliente por ID (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "DELETE",
-						"header": [],
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/clients/1",
+							"raw": "{{base_url}}/clients/{{test_client_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"clients",
-								"1"
+								"{{test_client_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Actualizar Cliente Completo (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cliente QA Editado\",\n    \"last_name\": \"Test Editado\",\n    \"doc_id\": \"V-00000001\",\n    \"phone\": \"04141112233\",\n    \"direction\": \"Dirección PUT actualizada\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/clients/{{test_client_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"clients",
+								"{{test_client_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Actualizar Cliente Parcial (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"04129998877\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/clients/{{test_client_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"clients",
+								"{{test_client_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Eliminar Cliente (DELETE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status es 200 o 204 (Eliminado)', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"pm.test('Limpiar variable test_client_id', function () {",
+									"    pm.collectionVariables.unset('test_client_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/clients/{{test_client_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"clients",
+								"{{test_client_id}}"
 							]
 						}
 					},
@@ -141,10 +456,83 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "Obtener todos los Usuarios",
+					"name": "1. Crear Usuario (POST)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201 - Creado', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test('Guardar ID del usuario en variable', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var id = jsonData.user_id || (jsonData.user && jsonData.user.user_id);",
+									"    pm.expect(id).to.not.be.undefined;",
+									"    pm.collectionVariables.set('test_user_id', id);",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('token', jsonData.token);",
+									"        console.log('✅ Token actualizado desde registro');",
+									"    }",
+									"    console.log('✅ Usuario ID guardado:', id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role_id\": 1,\n    \"name\": \"QA User\",\n    \"email\": \"qa_user_{{$timestamp}}@lacasona.com\",\n    \"password\": \"secreta123\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Obtener todos los Usuarios (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/users",
 							"host": [
@@ -158,27 +546,163 @@
 					"response": []
 				},
 				{
-					"name": "Crear Usuario",
+					"name": "3. Obtener Usuario por ID (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [
 							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"role_id\": 1,\n    \"name\": \"Nuevo Admin\",\n    \"email\": \"nuevo_admin@satda.com\",\n    \"password\": \"secreta123\",\n    \"status\": \"active\"\n}"
-						},
 						"url": {
-							"raw": "{{base_url}}/users",
+							"raw": "{{base_url}}/users/{{test_user_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"users"
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Actualizar Usuario Completo (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role_id\": 2,\n    \"name\": \"QA User Editado\",\n    \"email\": \"qa_user_test_mod@lacasona.com\",\n    \"password\": \"nuevapass123\",\n    \"status\": \"inactive\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Actualizar Usuario Parcial (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Eliminar Usuario (DELETE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status es 200 o 204 (Eliminado)', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"pm.test('Limpiar variable test_user_id', function () {",
+									"    pm.collectionVariables.unset('test_user_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
 							]
 						}
 					},
@@ -190,10 +714,42 @@
 			"name": "Events",
 			"item": [
 				{
-					"name": "Obtener todos los Eventos",
+					"name": "1. Crear Evento (POST)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201 - Creado', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test('Guardar ID del evento en variable', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var id = jsonData.event_id || (jsonData.data && jsonData.data.event_id);",
+									"    pm.expect(id).to.not.be.undefined;",
+									"    pm.collectionVariables.set('test_event_id', id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "GET",
-						"header": [],
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": 2,\n    \"venue_id\": 1,\n    \"start_date\": \"2026-08-15T18:00:00Z\",\n    \"end_date\": \"2026-08-16T02:00:00Z\",\n    \"type_event\": \"Evento QA Test\",\n    \"status\": \"Pending\"\n}"
+						},
 						"url": {
 							"raw": "{{base_url}}/events",
 							"host": [
@@ -207,20 +763,28 @@
 					"response": []
 				},
 				{
-					"name": "Crear Evento",
+					"name": "2. Obtener todos los Eventos (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [
 							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"client_id\": 2,\n    \"venue_id\": 1,\n    \"start_date\": \"2026-08-15T18:00:00Z\",\n    \"end_date\": \"2026-08-16T02:00:00Z\",\n    \"type_event\": \"Boda\",\n    \"status\": \"Pending\"\n}"
-						},
 						"url": {
 							"raw": "{{base_url}}/events",
 							"host": [
@@ -232,24 +796,165 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Venues",
-			"item": [
+				},
 				{
-					"name": "Obtener todos los Salones",
+					"name": "3. Obtener Evento por ID (GET)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/venues",
+							"raw": "{{base_url}}/events/{{test_event_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"venues"
+								"events",
+								"{{test_event_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Actualizar Evento Completo (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": 2,\n    \"venue_id\": 1,\n    \"start_date\": \"2026-08-15T18:00:00Z\",\n    \"end_date\": \"2026-08-16T04:00:00Z\",\n    \"type_event\": \"Boda QA Actualizada\",\n    \"status\": \"Confirmed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/events/{{test_event_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events",
+								"{{test_event_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Actualizar Evento Parcial (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Cancelled\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/events/{{test_event_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events",
+								"{{test_event_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Eliminar Evento (DELETE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status es 200 o 204 (Eliminado)', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"pm.test('Limpiar variable test_event_id', function () {",
+									"    pm.collectionVariables.unset('test_event_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/events/{{test_event_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"events",
+								"{{test_event_id}}"
 							]
 						}
 					},
@@ -263,6 +968,23 @@
 			"key": "base_url",
 			"value": "http://localhost:3000/api",
 			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_client_id",
+			"value": ""
+		},
+		{
+			"key": "test_user_id",
+			"value": ""
+		},
+		{
+			"key": "test_event_id",
+			"value": ""
 		}
 	]
 }

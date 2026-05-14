@@ -6,6 +6,11 @@ exports.getAllUsers = catchAsync(async (req, res) => {
   res.status(200).json(users);
 });
 
+exports.getUserById = catchAsync(async (req, res) => {
+  const user = await userService.getUserById(req.params.id);
+  res.status(200).json(user);
+});
+
 exports.updateUser = catchAsync(async (req, res) => {
   const user = await userService.updateUser(req.params.id, req.body);
   res.status(200).json({ message: 'Usuario actualizado correctamente', data: user });

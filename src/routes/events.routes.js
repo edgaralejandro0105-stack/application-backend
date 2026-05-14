@@ -13,6 +13,7 @@ router.post('/', validateSchema(createEventSchema), eventController.createEvent)
 router.get('/', eventController.getAllEvents);       // GET: Pide todos los eventos
 router.get('/:id', eventController.getEventById);    // GET (con /:id): Pide un evento en específico usando su ID
 router.put('/:id', eventController.updateEvent);     // PUT: Actualiza/Modifica un evento existente por ID
+router.patch('/:id', eventController.updateEvent);   // PATCH: Actualización parcial
 router.delete('/:id', eventController.deleteEvent);  // DELETE: Elimina el evento que coincida con el ID
 
 module.exports = router;

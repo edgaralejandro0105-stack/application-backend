@@ -37,10 +37,22 @@ class AuthService {
   }
 
   async login(email, password) {
-    const user = await User.findOne({ where: { email } });
-    
+    const user = await User.findOne({
+      where: { email },
+      include: [{ model: Role, attributes: ['role_name', 'access'] }]
+    });
+
+    // Credenciales inválidas — mismo mensaje para email y contraseña (seguridad)
     if (!user || user.password !== this.hashPassword(password)) {
       throw new AppError('Credenciales inválidas', 401);
+    }
+
+    // Verificar que la cuenta esté activa
+    if (user.status === 'inactive') {
+      throw new AppError('Tu cuenta ha sido desactivada. Contacta al administrador.', 403);
+    }
+    if (user.status === 'suspended') {
+      throw new AppError('Tu cuenta está suspendida. Contacta al administrador.', 403);
     }
 
     const token = this.generateToken(user);

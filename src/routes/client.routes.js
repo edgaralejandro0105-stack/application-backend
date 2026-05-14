@@ -9,6 +9,7 @@ router.post('/', validateSchema(createClientSchema), clientController.createClie
 router.get('/', clientController.getAllClients);
 router.get('/:id', clientController.getClientById);
 router.put('/:id', clientController.updateClient);
+router.patch('/:id', clientController.updateClient);
 router.delete('/:id', clientController.deleteClient);
 
 module.exports = router;

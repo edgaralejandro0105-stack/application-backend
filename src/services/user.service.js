@@ -9,6 +9,15 @@ class UserService {
     });
   }
 
+  async getUserById(id) {
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ['password'] },
+      include: [{ model: Role, attributes: ['role_name', 'access'] }]
+    });
+    if (!user) throw new AppError('Usuario no encontrado', 404);
+    return user;
+  }
+
   async updateUser(id, data) {
     const user = await User.findByPk(id);
     if (!user) throw new AppError('Usuario no encontrado', 404);
