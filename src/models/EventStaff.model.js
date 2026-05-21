@@ -4,7 +4,7 @@ const Event = require('./Event.model');
 const Employee = require('./Employee.model');
 
 const EventStaff = db.define('EventStaff', {
-  id: {
+  assignment_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -15,7 +15,7 @@ const EventStaff = db.define('EventStaff', {
       model: Event,
       key: 'event_id'
     },
-    allowNull: false
+    allowNull: true
   },
   employee_id: {
     type: DataTypes.INTEGER,
@@ -23,11 +23,10 @@ const EventStaff = db.define('EventStaff', {
       model: Employee,
       key: 'employee_id'
     },
-    allowNull: false
+    allowNull: true
   },
-  role_in_event: {
-    type: DataTypes.STRING(50), 
-    // Ejemplo: 'Mesero Principal', 'Coordinador de Luces', 'Seguridad Puerta A'
+  notes: {
+    type: DataTypes.TEXT, 
     allowNull: true
   }
 }, {

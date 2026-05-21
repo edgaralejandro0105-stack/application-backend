@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/db');
-const Event = require('./Event.model');
 
 const ServiceExternal = db.define('ServiceExternal', {
   service_id: {
@@ -8,26 +7,24 @@ const ServiceExternal = db.define('ServiceExternal', {
     primaryKey: true,
     autoIncrement: true
   },
-  event_id: {
-    type: DataTypes.INTEGER,
-    references: { model: Event, key: 'event_id' }
-  },
-  provider_name: {
-    type: DataTypes.STRING(50),
-    allowNull: false
-  },
   service_type: {
-    type: DataTypes.STRING(30)
+    type: DataTypes.STRING(50)
   },
-  cost: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
+  name: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  base_price: {
+    type: DataTypes.DECIMAL,
+    allowNull: true
+  },
+  provider_info: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'services_external',
   timestamps: false
 });
-
-ServiceExternal.belongsTo(Event, { foreignKey: 'event_id' });
 
 module.exports = ServiceExternal;

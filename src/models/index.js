@@ -42,8 +42,8 @@ Event.belongsTo(Venue, { foreignKey: 'venue_id' });
 Event.hasMany(EventItem, { foreignKey: 'event_id' });
 EventItem.belongsTo(Event, { foreignKey: 'event_id' });
 
-Product.hasMany(EventItem, { foreignKey: 'product_id' });
-EventItem.belongsTo(Product, { foreignKey: 'product_id' });
+ServiceExternal.hasMany(EventItem, { foreignKey: 'service_id' });
+EventItem.belongsTo(ServiceExternal, { foreignKey: 'service_id' });
 
 // Event - EventStaff
 Event.hasMany(EventStaff, { foreignKey: 'event_id' });
@@ -51,9 +51,6 @@ EventStaff.belongsTo(Event, { foreignKey: 'event_id' });
 
 Employee.hasMany(EventStaff, { foreignKey: 'employee_id' });
 EventStaff.belongsTo(Employee, { foreignKey: 'employee_id' });
-
-Role.hasMany(EventStaff, { foreignKey: 'role_id' });
-EventStaff.belongsTo(Role, { foreignKey: 'role_id' });
 
 // Sale - SaleDetails
 Sale.hasMany(SaleDetail, { foreignKey: 'sale_id' });

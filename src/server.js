@@ -39,9 +39,22 @@ const limiter = rateLimit({
 // Middlewares globales
 app.use(helmet());
 
-// CORS Configurado para Vite
+// CORS Configurado para Vite y Next.js (admite cualquier puerto localhost en desarrollo)
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:3001'
+].filter(Boolean);
+
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // URL de Vite
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200
 };

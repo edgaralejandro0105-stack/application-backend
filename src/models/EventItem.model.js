@@ -1,10 +1,10 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/db');
 const Event = require('./Event.model');
-const Product = require('./Product.model');
+const ServiceExternal = require('./ServiceExternal.model');
 
 const EventItem = db.define('EventItem', {
-  id: {
+  item_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -13,13 +13,13 @@ const EventItem = db.define('EventItem', {
     type: DataTypes.INTEGER,
     references: { model: Event, key: 'event_id' }
   },
-  product_id: {
+  service_id: {
     type: DataTypes.INTEGER,
-    references: { model: Product, key: 'product_id' }
+    references: { model: ServiceExternal, key: 'service_id' }
   },
-  quantity_planned: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  final_price: {
+    type: DataTypes.DECIMAL,
+    allowNull: true
   }
 }, {
   tableName: 'event_items',
@@ -27,6 +27,6 @@ const EventItem = db.define('EventItem', {
 });
 
 EventItem.belongsTo(Event, { foreignKey: 'event_id' });
-EventItem.belongsTo(Product, { foreignKey: 'product_id' });
+EventItem.belongsTo(ServiceExternal, { foreignKey: 'service_id' });
 
 module.exports = EventItem;

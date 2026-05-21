@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/db');
 const Sale = require('./Sale.model');
+const Product = require('./Product.model');
 
 const SaleDetail = db.define('SaleDetail', {
   detail_id: {
@@ -11,6 +12,11 @@ const SaleDetail = db.define('SaleDetail', {
   sale_id: {
     type: DataTypes.INTEGER,
     references: { model: Sale, key: 'sale_id' }
+  },
+  product_id: {
+    type: DataTypes.INTEGER,
+    references: { model: Product, key: 'product_id' },
+    allowNull: true
   },
   quantity: {
     type: DataTypes.DECIMAL,
@@ -26,5 +32,6 @@ const SaleDetail = db.define('SaleDetail', {
 });
 
 SaleDetail.belongsTo(Sale, { foreignKey: 'sale_id' });
+SaleDetail.belongsTo(Product, { foreignKey: 'product_id' });
 
 module.exports = SaleDetail;

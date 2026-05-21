@@ -1,4 +1,4 @@
-const { EventStaff, Employee, Role } = require('../models');
+const { EventStaff, Employee } = require('../models');
 const AppError = require('../utils/AppError');
 
 class EventStaffService {
@@ -9,8 +9,7 @@ class EventStaffService {
   async getAllEventStaff() {
     return await EventStaff.findAll({
       include: [
-        { model: Employee, attributes: ['first_name', 'last_name', 'phone'] },
-        { model: Role, attributes: ['role_name'] }
+        { model: Employee, attributes: ['first_name', 'last_name', 'phone'] }
       ]
     });
   }
@@ -18,8 +17,7 @@ class EventStaffService {
   async getEventStaffById(id) {
     const staff = await EventStaff.findByPk(id, {
       include: [
-        { model: Employee, attributes: ['first_name', 'last_name'] },
-        { model: Role, attributes: ['role_name'] }
+        { model: Employee, attributes: ['first_name', 'last_name'] }
       ]
     });
     if (!staff) throw new AppError('Asignación de staff no encontrada', 404);
@@ -30,8 +28,7 @@ class EventStaffService {
     return await EventStaff.findAll({
       where: { event_id: eventId },
       include: [
-        { model: Employee, attributes: ['first_name', 'last_name', 'phone'] },
-        { model: Role, attributes: ['role_name'] }
+        { model: Employee, attributes: ['first_name', 'last_name', 'phone'] }
       ]
     });
   }

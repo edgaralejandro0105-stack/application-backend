@@ -23,6 +23,12 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "jest tests/"
+    "dev": "nodemon src/server.js",
+    "test": "jest tests/ --runInBand --forceExit"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["./tests/setup.js"],
+    "testTimeout": 30000
   }
 }

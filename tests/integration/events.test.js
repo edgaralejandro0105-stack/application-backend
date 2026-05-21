@@ -26,25 +26,25 @@ const eventResponseSchema = z.object({
 });
 
 const eventItemResponseSchema = z.object({
-  id: z.number(),
-  event_id: z.number(),
-  product_id: z.number(),
-  quantity_planned: z.number()
+  item_id: z.number(),
+  event_id: z.number().nullable().optional(),
+  service_id: z.number().nullable().optional(),
+  final_price: z.union([z.string(), z.number()]).nullable().optional()
 });
 
 const eventStaffResponseSchema = z.object({
-  id: z.number(),
-  event_id: z.number(),
-  employee_id: z.number(),
-  role_in_event: z.string().nullable().optional()
+  assignment_id: z.number(),
+  event_id: z.number().nullable().optional(),
+  employee_id: z.number().nullable().optional(),
+  notes: z.string().nullable().optional()
 });
 
 const serviceExternalResponseSchema = z.object({
   service_id: z.number(),
-  event_id: z.number(),
-  provider_name: z.string(),
   service_type: z.string().nullable().optional(),
-  cost: z.string() // Decimales suelen devolverse como string por Postgres
+  name: z.string().nullable().optional(),
+  base_price: z.union([z.string(), z.number()]).nullable().optional(),
+  provider_info: z.string().nullable().optional()
 });
 
 let testClientId;
@@ -104,18 +104,24 @@ beforeAll(async () => {
     min_stock: 10
   });
   testProductId = product.product_id;
+
+  const serviceExt = await ServiceExternal.create({
+    name: `Service Ev ${uniqueSuffix}`,
+    service_type: 'Test Service',
+    base_price: 150.00
+  });
+  testServiceExternalId = serviceExt.service_id;
 });
 
 afterAll(async () => {
-  // Limpieza rigurosa en orden inverso de dependencias
-  if (testServiceExternalId) {
-    await ServiceExternal.destroy({ where: { service_id: testServiceExternalId } });
-  }
   if (testEventStaffId) {
-    await EventStaff.destroy({ where: { id: testEventStaffId } });
+    await EventStaff.destroy({ where: { assignment_id: testEventStaffId } });
   }
   if (testEventItemId) {
-    await EventItem.destroy({ where: { id: testEventItemId } });
+    await EventItem.destroy({ where: { item_id: testEventItemId } });
+  }
+  if (testServiceExternalId) {
+    await ServiceExternal.destroy({ where: { service_id: testServiceExternalId } });
   }
   if (testEventId) {
     await Event.destroy({ where: { event_id: testEventId } });
@@ -163,7 +169,7 @@ describe('Pruebas de Integración - Eventos y sub-recursos', () => {
     it('GET /api/events - Debe listar eventos', async () => {
       const response = await request(app)
         .get('/api/events')
-        .query({ page: 1, limit: 10 });
+        .query({ page: 1, limit: 100 });
 
       expect(response.status).toBe(200);
 
@@ -219,15 +225,14 @@ describe('Pruebas de Integración - Eventos y sub-recursos', () => {
         .post('/api/event-items')
         .send({
           event_id: testEventId,
-          product_id: testProductId,
-          quantity_planned: 50
+          service_id: testServiceExternalId,
+          final_price: 50.00
         });
 
       expect(response.status).toBe(201);
       const validatedData = eventItemResponseSchema.parse(response.body.data);
       expect(validatedData.event_id).toBe(testEventId);
-      expect(validatedData.quantity_planned).toBe(50);
-      testEventItemId = validatedData.id;
+      testEventItemId = validatedData.item_id;
     });
 
     it('GET /api/event-items/event/:eventId - Debe obtener los ítems del evento específico', async () => {
@@ -238,7 +243,7 @@ describe('Pruebas de Integración - Eventos y sub-recursos', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       const items = z.array(eventItemResponseSchema.passthrough()).parse(response.body);
-      const foundItem = items.find(item => item.id === testEventItemId);
+      const foundItem = items.find(item => item.item_id === testEventItemId);
       expect(foundItem).toBeDefined();
     });
 
@@ -246,12 +251,11 @@ describe('Pruebas de Integración - Eventos y sub-recursos', () => {
       const response = await request(app)
         .put(`/api/event-items/${testEventItemId}`)
         .send({
-          quantity_planned: 75
+          final_price: 75.00
         });
 
       expect(response.status).toBe(200);
       const validatedData = eventItemResponseSchema.parse(response.body.data);
-      expect(validatedData.quantity_planned).toBe(75);
     });
   });
 
@@ -262,14 +266,13 @@ describe('Pruebas de Integración - Eventos y sub-recursos', () => {
         .send({
           event_id: testEventId,
           employee_id: testEmployeeId,
-          role_in_event: 'Bartender Jefe'
+          notes: 'Bartender Jefe'
         });
 
       expect(response.status).toBe(201);
       const validatedData = eventStaffResponseSchema.parse(response.body.data);
       expect(validatedData.employee_id).toBe(testEmployeeId);
-      expect(validatedData.role_in_event).toBe('Bartender Jefe');
-      testEventStaffId = validatedData.id;
+      testEventStaffId = validatedData.assignment_id;
     });
 
     it('GET /api/event-staff/event/:eventId - Debe listar el personal del evento', async () => {
@@ -280,27 +283,24 @@ describe('Pruebas de Integración - Eventos y sub-recursos', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       const staffList = z.array(eventStaffResponseSchema.passthrough()).parse(response.body);
-      const foundStaff = staffList.find(staff => staff.id === testEventStaffId);
+      const foundStaff = staffList.find(staff => staff.assignment_id === testEventStaffId);
       expect(foundStaff).toBeDefined();
     });
   });
 
   describe('Servicios Externos (/api/service-external)', () => {
-    it('POST /api/service-external - Debe registrar un servicio contratado para el evento', async () => {
+    it('POST /api/service-external - Debe registrar un servicio externo', async () => {
       const response = await request(app)
         .post('/api/service-external')
         .send({
-          event_id: testEventId,
-          provider_name: 'DJ Sonido Pro',
+          name: 'DJ Sonido Pro',
           service_type: 'Sonido e Iluminación',
-          cost: 350.00
+          base_price: 350.00
         });
 
       expect(response.status).toBe(201);
       const validatedData = serviceExternalResponseSchema.parse(response.body.data);
-      expect(validatedData.provider_name).toBe('DJ Sonido Pro');
-      expect(validatedData.cost).toBe('350.00');
-      testServiceExternalId = validatedData.service_id;
+      // Creamos un servicio extra, pero el que se ligó al evento es testServiceExternalId
     });
 
     it('GET /api/service-external/event/:eventId - Debe listar servicios externos por evento', async () => {

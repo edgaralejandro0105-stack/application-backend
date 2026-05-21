@@ -17,7 +17,12 @@ class ServiceExternalService {
   }
 
   async getServicesByEvent(eventId) {
-    return await ServiceExternal.findAll({ where: { event_id: eventId } });
+    const { EventItem } = require('../models');
+    const items = await EventItem.findAll({ 
+      where: { event_id: eventId },
+      include: [{ model: ServiceExternal }] 
+    });
+    return items.map(item => item.ServiceExternal).filter(Boolean);
   }
 
   async updateServiceExternal(id, data) {
