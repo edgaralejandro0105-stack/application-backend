@@ -21,12 +21,22 @@ const Product = db.define('Product', {
   },
   expiry_date: {
     type: DataTypes.DATEONLY
+  },
+  current_stock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  min_stock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   }
 }, {
   tableName: 'products',
   timestamps: true,
   createdAt: 'create_at',
-  updatedAt: 'update_at'
+  updatedAt: 'update_at',
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 module.exports = Product;

@@ -45,7 +45,9 @@ const Employee = db.define('Employee', {
   tableName: 'employees',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: 'updated_at',
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 // Relaciones técnicas

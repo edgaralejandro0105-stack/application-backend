@@ -11,7 +11,10 @@ class VenueService {
     const where = {};
     if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
 
-    const result = await Venue.findAndCountAll({ where, limit, offset, order: [['name', 'ASC']] });
+    const options = { where, limit, offset, order: [['name', 'ASC']] };
+    if (query.includeDeleted === 'true') options.paranoid = false;
+
+    const result = await Venue.findAndCountAll(options);
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 

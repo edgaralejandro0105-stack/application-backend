@@ -35,7 +35,9 @@ const Client = db.define('Client', {
   timestamps: true,     // Activa la creación automática de fechas
   // Traducimos los nombres que Sequelize crea por defecto (createdAt) a los que tú usaste en tu SQL
   createdAt: 'created_at', 
-  updatedAt: 'update_at'
+  updatedAt: 'update_at',
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 module.exports = Client;

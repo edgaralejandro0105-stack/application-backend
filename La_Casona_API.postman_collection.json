@@ -168,7 +168,24 @@
 					"response": []
 				},
 				{
-					"name": "✅ Recuperar contraseña",
+					"name": "✅ Solicitar recuperación de contraseña (Forgot)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 - OK', () => {",
+									"  pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Respuesta contiene mensaje genérico de seguridad', () => {",
+									"  const json = pm.response.json();",
+									"  pm.expect(json.message).to.eql('Si el correo está registrado, se enviará un enlace de recuperación.');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -179,16 +196,56 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"francisco@lacasona.com\",\n  \"newPassword\": \"nueva123\"\n}"
+							"raw": "{\n  \"email\": \"francisco@lacasona.com\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/auth/recover-password",
+							"raw": "{{base_url}}/auth/forgot-password",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"auth",
-								"recover-password"
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Restablecer contraseña (Reset)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200 o 400 (depende de validez del token)', () => {",
+									"  pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"AQUI_VA_EL_TOKEN_RECIBIDO_EN_CORREO\",\n  \"newPassword\": \"nueva123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
 							]
 						}
 					},

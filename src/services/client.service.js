@@ -21,7 +21,10 @@ class ClientService {
       ];
     }
 
-    const result = await Client.findAndCountAll({ where, limit, offset, order: [['created_at', 'DESC']] });
+    const options = { where, limit, offset, order: [['created_at', 'DESC']] };
+    if (query.includeDeleted === 'true') options.paranoid = false;
+
+    const result = await Client.findAndCountAll(options);
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 

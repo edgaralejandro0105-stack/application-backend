@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { verifyToken } = require('../middleware/authMiddleware');
 const validateSchema = require('../middleware/validateSchema');
-const { registerSchema, loginSchema, recoverPasswordSchema } = require('../schemas/auth.schema');
+const { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } = require('../schemas/auth.schema');
 
 // URL base: /api/auth
 router.post('/register', validateSchema(registerSchema), authController.register); // Zod valida antes de registrar
@@ -12,6 +12,7 @@ router.post('/refresh-token', authController.refreshToken);
 
 // Nuevas rutas para la evaluación
 router.get('/profile', verifyToken, authController.getProfile);
-router.post('/recover-password', validateSchema(recoverPasswordSchema), authController.recoverPassword); // Zod valida antes de recuperar
+router.post('/forgot-password', validateSchema(forgotPasswordSchema), authController.forgotPassword);
+router.post('/reset-password', validateSchema(resetPasswordSchema), authController.resetPassword);
 
 module.exports = router;

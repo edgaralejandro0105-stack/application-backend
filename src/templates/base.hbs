@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Casona</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .header {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            color: #cccccc;
+        }
+        .content {
+            padding: 30px;
+            line-height: 1.6;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #777777;
+            border-top: 1px solid #eeeeee;
+        }
+        .button {
+            display: inline-block;
+            background-color: #d4af37; /* Dorado / Gold */
+            color: #1a1a1a !important;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        /* Tabla para reportes */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+                margin-top: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- Espacio para el Logo -->
+            <div style="font-size: 30px; margin-bottom: 10px;">👑</div>
+            <h1>LA CASONA</h1>
+            <p>Sistema de Gestión de Eventos</p>
+        </div>
+        <div class="content">
+            {{{body}}}
+        </div>
+        <div class="footer">
+            <p>&copy; {{currentYear}} La Casona. Todos los derechos reservados.</p>
+            <p>Este es un correo generado automáticamente. Por favor, no responda a este mensaje.</p>
+        </div>
+    </div>
+</body>
+</html>

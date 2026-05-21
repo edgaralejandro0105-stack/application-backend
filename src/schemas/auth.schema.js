@@ -24,9 +24,17 @@ const loginSchema = z.object({
     .min(1, 'La contraseña no puede estar vacía'),
 });
 
-const recoverPasswordSchema = z.object({
-    email: z.string({ required_error: 'El email es requerido' }).email({ message: 'Formato de email inválido' }),
-    newPassword: z.string({ required_error: 'La nueva contraseña es requerida' }).min(6, 'La contraseña debe tener al menos 6 caracteres'),
+const forgotPasswordSchema = z.object({
+  email: z.string({ required_error: 'El email es requerido' })
+    .trim()
+    .toLowerCase()
+    .email({ message: 'Formato de email inválido' }),
 });
 
-module.exports = { registerSchema, loginSchema, recoverPasswordSchema };
+const resetPasswordSchema = z.object({
+  token: z.string({ required_error: 'El token es requerido' }),
+  newPassword: z.string({ required_error: 'La nueva contraseña es requerida' })
+    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+});
+
+module.exports = { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema };

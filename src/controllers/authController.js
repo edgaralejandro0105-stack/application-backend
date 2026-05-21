@@ -46,9 +46,15 @@ exports.getProfile = catchAsync(async (req, res) => {
   res.status(200).json(user);
 });
 
-exports.recoverPassword = catchAsync(async (req, res) => {
-  const { email, newPassword } = req.body;
-  await authService.recoverPassword(email, newPassword);
-  res.status(200).json({ message: "Contraseña actualizada exitosamente" });
+exports.forgotPassword = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  await authService.forgotPassword(email);
+  res.status(200).json({ message: "Si el correo está registrado, se enviará un enlace de recuperación." });
+});
+
+exports.resetPassword = catchAsync(async (req, res) => {
+  const { token, newPassword } = req.body;
+  await authService.resetPassword(token, newPassword);
+  res.status(200).json({ message: "Contraseña actualizada exitosamente." });
 });
 

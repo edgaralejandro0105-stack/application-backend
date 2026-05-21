@@ -25,7 +25,11 @@ const Sale = db.define('Sale', {
   }
 }, {
   tableName: 'sales',
-  timestamps: false
+  timestamps: true,
+  createdAt: 'create_at',
+  updatedAt: 'update_at',
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 Sale.belongsTo(Employee, { foreignKey: 'employee_id' });

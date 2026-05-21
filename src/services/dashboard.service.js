@@ -27,10 +27,10 @@ class DashboardService {
         InventoryBar.findAll({
           attributes: [
             'product_id',
-            [fn('SUM', literal("CASE WHEN movement_type = 'Sale' THEN quantity * -1 ELSE quantity END")), 'stock']
+            [fn('SUM', literal("CASE WHEN movement_type = 'Exit' THEN quantity * -1 ELSE quantity END")), 'stock']
           ],
           group: ['product_id'],
-          having: literal("SUM(CASE WHEN movement_type = 'Sale' THEN quantity * -1 ELSE quantity END) <= 5")
+          having: literal("SUM(CASE WHEN movement_type = 'Exit' THEN quantity * -1 ELSE quantity END) <= 5")
         })
       ]);
 

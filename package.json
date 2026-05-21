@@ -2,19 +2,27 @@
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.1",
+    "handlebars": "^4.7.9",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.7",
+    "pdfkit": "^0.18.0",
     "pg": "^8.20.0",
     "sequelize": "^6.37.8",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   },
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "jest tests/"
   }
 }

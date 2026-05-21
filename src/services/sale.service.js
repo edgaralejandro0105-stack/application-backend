@@ -15,7 +15,10 @@ class SaleService {
     const where = {};
     if (query.event_id) where.event_id = query.event_id;
 
-    const result = await Sale.findAndCountAll({ where, limit, offset, order: [['create_at', 'DESC']] });
+    const options = { where, limit, offset, order: [['create_at', 'DESC']] };
+    if (query.includeDeleted === 'true') options.paranoid = false;
+
+    const result = await Sale.findAndCountAll(options);
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 

@@ -24,12 +24,17 @@ class ProductService {
       where.category = query.category;
     }
 
-    const products = await Product.findAndCountAll({
+    const options = {
       where,
       limit,
       offset,
       order: [['create_at', 'DESC']]
-    });
+    };
+    if (query.includeDeleted === 'true') {
+      options.paranoid = false;
+    }
+
+    const products = await Product.findAndCountAll(options);
 
     return {
       total: products.count,

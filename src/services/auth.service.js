@@ -90,14 +90,53 @@ class AuthService {
     return user;
   }
 
-  async recoverPassword(email, newPassword) {
+  async forgotPassword(email) {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      throw new AppError('Usuario no encontrado', 404);
+      // Por seguridad, retornamos true de todas formas sin avisar si existe o no
+      return true;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.reset_password_token = resetToken;
+    user.reset_password_expires = new Date(Date.now() + 15 * 60000); // 15 minutos
+    await user.save();
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    const emailService = require('./email.service');
+    await emailService.sendEmail({
+      to: user.email,
+      subject: 'Recuperación de Contraseña - La Casona',
+      templateName: 'recover-password',
+      context: {
+        name: user.name,
+        resetUrl: resetUrl
+      }
+    });
+
+    return true;
+  }
+
+  async resetPassword(token, newPassword) {
+    const { Op } = require('sequelize');
+    const user = await User.findOne({ 
+      where: { 
+        reset_password_token: token,
+        reset_password_expires: { [Op.gt]: new Date() }
+      } 
+    });
+
+    if (!user) {
+      throw new AppError('Token inválido o expirado', 400);
     }
 
     user.password = this.hashPassword(newPassword);
+    user.reset_password_token = null;
+    user.reset_password_expires = null;
     await user.save();
+
     return true;
   }
 }

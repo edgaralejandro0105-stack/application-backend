@@ -23,6 +23,7 @@ const eventItemsRoutes = require('./routes/event-items.routes');
 const eventStaffRoutes = require('./routes/event-staff.routes');
 const serviceExternalRoutes = require('./routes/service-external.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const reportsRoutes = require('./routes/reports.routes');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -30,9 +31,9 @@ const app = express();
 
 // Rate Limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Limita cada IP a 100 peticiones por ventana de tiempo
-  message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo en 15 minutos.'
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // Limita cada IP a 100 peticiones por ventana de tiempo
+    message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo en 15 minutos.'
 });
 
 // Middlewares globales
@@ -40,9 +41,9 @@ app.use(helmet());
 
 // CORS Configurado para Vite
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // URL de Vite
-  credentials: true,
-  optionsSuccessStatus: 200
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173', // URL de Vite
+    credentials: true,
+    optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
 
@@ -66,6 +67,7 @@ app.use('/api/event-items', eventItemsRoutes);
 app.use('/api/event-staff', eventStaffRoutes);
 app.use('/api/service-external', serviceExternalRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -98,12 +100,20 @@ async function startServer() {
                     );
                 END LOOP;
             END $$;
-        `).catch(() => {});
+        `).catch(() => { });
 
         // 2. Ampliar password a VARCHAR(255) para hashes SHA-256 de 64 chars
         await sequelize.query(
             `ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(255);`
-        ).catch(() => {});
+        ).catch(() => { });
+
+        // 3. Agregar columnas reset_password_token y reset_password_expires si no existen
+        await sequelize.query(
+            `ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token VARCHAR(255);`
+        ).catch(() => { });
+        await sequelize.query(
+            `ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires TIMESTAMP WITH TIME ZONE;`
+        ).catch(() => { });
 
         // ─── Sincronización normal ─────────────────────────────────────────────
         // sync() crea tablas que falten pero NO altera las existentes.
@@ -111,12 +121,26 @@ async function startServer() {
         await sequelize.sync();
         console.log('✅ Base de datos sincronizada exitosamente');
 
-        app.listen(PORT, () => {
-            console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
-        });
+        // [MODIFICACIÓN PARA TESTS]: Verificamos si este archivo se ejecuta directamente con Node o si es importado.
+        // Si es importado por Jest/Supertest, NO iniciamos el servidor en el puerto para evitar el error "EADDRINUSE".
+        if (require.main === module) {
+            app.listen(PORT, () => {
+                console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+
+                // Inicializar tareas programadas (Cron Jobs)
+                const cronService = require('./services/cron.service');
+                cronService.init();
+            });
+        }
     } catch (error) {
         console.error('❌ Error al conectar/sincronizar la base de datos:', error);
     }
 }
 
-startServer();
+// [MODIFICACIÓN PARA TESTS]: Solo llamamos a startServer() si se ejecuta directamente con Node.
+if (require.main === module) {
+    startServer();
+}
+
+// [MODIFICACIÓN PARA TESTS]: Exportamos la app para que Supertest pueda usarla e inyectar peticiones en memoria.
+module.exports = app;

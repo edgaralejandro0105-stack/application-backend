@@ -17,6 +17,8 @@ API RESTful para el panel administrativo de gestión de inventarios, eventos y b
 | Helmet | ^8.1 | Cabeceras de seguridad HTTP |
 | express-rate-limit | ^7+ | Protección contra DDoS |
 | Morgan | ^1.10 | Logger HTTP |
+| Jest | ^30.4 | Framework de pruebas (Testing) |
+| Supertest | ^7.2 | Testing de integración HTTP |
 
 ---
 
@@ -76,6 +78,8 @@ src/
 │   ├── product.schema.js
 │   ├── sale.schema.js
 │   └── venue.schema.js
+├── tests/                     # 🧪 Pruebas de Integración y Unitarias
+│   └── integration/           # Pruebas de API con Jest y Supertest
 └── utils/
     ├── AppError.js            # Clase de error operacional personalizada
     └── catchAsync.js          # Wrapper async para controladores
@@ -144,6 +148,30 @@ npx nodemon src/server.js
 | **CORS** | Solo permite peticiones desde `FRONTEND_URL` (por defecto `http://localhost:5173`) |
 | **Helmet** | Configura cabeceras HTTP seguras automáticamente |
 | **Zod** | Valida el `req.body` antes de que llegue al controlador o la base de datos |
+
+---
+
+## 🧪 Pruebas y Aseguramiento de Calidad (QA)
+
+El proyecto cuenta con un entorno de pruebas robusto para garantizar la estabilidad de los endpoints.
+
+### 1. Pruebas de Integración Automatizadas
+Se utilizan **Jest** y **Supertest** para realizar pruebas de integración (ej. `api.test.js`). Estas pruebas verifican:
+- Códigos de estado HTTP correctos (200, 201, 400, 401, etc.).
+- Respuestas en formato JSON validadas estrictamente con esquemas Zod.
+- Control del ciclo de vida de la BD (setup y teardown de datos en base de pruebas).
+
+Para ejecutar la suite de pruebas automatizadas:
+```bash
+npm run test
+```
+
+### 2. Colección de Postman con Tests
+En la raíz del proyecto encontrarás el archivo `La_Casona_API.postman_collection.json`. 
+Esta colección incluye **scripts de validación integrados** en cada endpoint que verifican automáticamente:
+- Códigos de estado esperados para flujos de éxito y error.
+- Tiempo de respuesta.
+- Tipos de datos correctos y captura de tokens (pasando automáticamente IDs y tokens de sesión entre peticiones).
 
 ---
 

@@ -23,7 +23,11 @@ const Venue = db.define('Venue', {
   }
 }, {
   tableName: 'venues',
-  timestamps: false // Si no necesitas trackear creación/edición de infraestructura
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 module.exports = Venue;
