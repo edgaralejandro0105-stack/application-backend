@@ -1,14 +1,14 @@
-<h2>Reporte Semanal Automático</h2>
+<h2 style="margin-top: 0; font-size: 20px; font-weight: 600; color: #18181b;">Reporte Semanal Automático</h2>
 <p>Hola Administrador,</p>
 <p>A continuación se presenta el resumen semanal generado automáticamente por el sistema.</p>
 
-<h3>1. Resumen de Ventas</h3>
+<h3 style="color: #3f3f46; font-size: 16px; margin-top: 32px;">1. Resumen de Ventas</h3>
 <p>Total de ventas concretadas en los últimos 7 días:</p>
-<div style="font-size: 24px; font-weight: bold; color: #d4af37; margin-bottom: 20px;">
+<div style="font-size: 32px; font-weight: bold; color: #18181b; margin-bottom: 32px;">
     ${{totalSales}}
 </div>
 
-<h3>2. Alertas de Inventario</h3>
+<h3 style="color: #3f3f46; font-size: 16px;">2. Alertas de Inventario</h3>
 <p>Los siguientes productos han alcanzado o están por debajo de su límite mínimo de stock:</p>
 
 {{#if lowStockProducts.length}}
@@ -24,14 +24,18 @@
             {{#each lowStockProducts}}
             <tr>
                 <td>{{this.name}}</td>
-                <td style="color: red; font-weight: bold;">{{this.current_stock}}</td>
+                <td style="color: #ef4444; font-weight: 600;">{{this.current_stock}}</td>
                 <td>{{this.min_stock}}</td>
             </tr>
             {{/each}}
         </tbody>
     </table>
 {{else}}
-    <p style="color: green; font-weight: bold;">✅ Todos los productos cuentan con stock suficiente.</p>
+    <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; padding: 16px; border-radius: 8px; margin-top: 16px;">
+        <p style="color: #059669; font-weight: 600; margin: 0;">✓ Todos los productos cuentan con stock suficiente.</p>
+    </div>
 {{/if}}
 
-<p style="margin-top: 30px;">Por favor, ingrese al sistema para revisar los detalles y gestionar los reabastecimientos necesarios.</p>
+<hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0;">
+
+<p style="font-size: 13px; color: #71717a;">Por favor, ingresa al sistema para revisar los detalles completos y gestionar los reabastecimientos necesarios.</p>

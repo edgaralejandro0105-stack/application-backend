@@ -32,7 +32,7 @@ const app = express();
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // Limita cada IP a 100 peticiones por ventana de tiempo
+    max: process.env.NODE_ENV === 'production' ? 100 : 10000, // 100 en prod, 10000 en dev
     message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo en 15 minutos.'
 });
 

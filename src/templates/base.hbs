@@ -6,84 +6,90 @@
     <title>La Casona</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f4f5; /* zinc-100 */
             margin: 0;
-            padding: 0;
-            color: #333333;
+            padding: 40px 20px;
+            color: #27272a; /* zinc-800 */
+            -webkit-font-smoothing: antialiased;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .header {
-            background-color: #1a1a1a;
+            background-color: #18181b; /* zinc-900 */
             color: #ffffff;
             text-align: center;
-            padding: 20px;
+            padding: 32px 20px;
         }
         .header h1 {
             margin: 0;
             font-size: 24px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
         .header p {
-            margin: 5px 0 0 0;
+            margin: 8px 0 0 0;
             font-size: 14px;
-            color: #cccccc;
+            color: #a1a1aa; /* zinc-400 */
         }
         .content {
-            padding: 30px;
+            padding: 40px 32px;
             line-height: 1.6;
         }
         .footer {
-            background-color: #f9f9f9;
+            background-color: #fafafa; /* zinc-50 */
             text-align: center;
-            padding: 15px;
+            padding: 24px;
             font-size: 12px;
-            color: #777777;
-            border-top: 1px solid #eeeeee;
+            color: #71717a; /* zinc-500 */
+            border-top: 1px solid #e4e4e7; /* zinc-200 */
         }
         .button {
             display: inline-block;
-            background-color: #d4af37; /* Dorado / Gold */
-            color: #1a1a1a !important;
+            background-color: #18181b; /* zinc-900 */
+            color: #ffffff !important;
             text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-top: 20px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 24px;
+            text-align: center;
         }
         /* Tabla para reportes */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 24px;
+            font-size: 14px;
         }
         .data-table th, .data-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border-bottom: 1px solid #e4e4e7;
+            padding: 12px 16px;
             text-align: left;
         }
         .data-table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
+            background-color: #f4f4f5;
+            font-weight: 600;
+            color: #3f3f46;
         }
         @media only screen and (max-width: 600px) {
+            body {
+                padding: 0;
+            }
             .container {
                 width: 100%;
-                margin-top: 0;
                 border-radius: 0;
+                box-shadow: none;
             }
             .content {
-                padding: 20px;
+                padding: 24px 20px;
             }
         }
     </style>
@@ -91,17 +97,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <!-- Espacio para el Logo -->
-            <div style="font-size: 30px; margin-bottom: 10px;">👑</div>
+            <!-- Branding -->
             <h1>LA CASONA</h1>
-            <p>Sistema de Gestión de Eventos</p>
+            <p>Sistema Integrado de Gestión Empresarial</p>
         </div>
         <div class="content">
             {{{body}}}
         </div>
         <div class="footer">
-            <p>&copy; {{currentYear}} La Casona. Todos los derechos reservados.</p>
-            <p>Este es un correo generado automáticamente. Por favor, no responda a este mensaje.</p>
+            <p>&copy; {{currentYear}} La Casona Eventos. Todos los derechos reservados.</p>
+            <p>Este es un mensaje generado automáticamente. Por favor, no respondas a este correo.</p>
         </div>
     </div>
 </body>

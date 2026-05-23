@@ -38,7 +38,6 @@ class ReportService {
       });
     });
 
-    // Devolvemos el buffer directamente para enviarlo vía HTTP
     return await workbook.xlsx.writeBuffer();
   }
 
@@ -46,7 +45,9 @@ class ReportService {
     return new Promise(async (resolve, reject) => {
       try {
         const products = await this.getActiveProducts();
-        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+        
+        // Configuración moderna de márgenes y tamaño (Enterprise UI)
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
         
         let buffers = [];
         doc.on('data', buffers.push.bind(buffers));
@@ -55,46 +56,81 @@ class ReportService {
           resolve(pdfData);
         });
 
-        // Título del documento
-        doc.fontSize(20).text('Reporte de Inventario Ciego', { align: 'center' });
-        doc.moveDown(2);
+        // ================= HEADER =================
+        // Estilo Enterprise: Texto limpio, fuentes Sans-Serif (Helvetica)
+        doc.fillColor('#18181b').fontSize(24).font('Helvetica-Bold');
+        doc.text('LA CASONA', 50, 50);
+        
+        doc.fillColor('#71717a').fontSize(10).font('Helvetica');
+        doc.text('Sistema Integrado de Gestión Empresarial', 50, 78);
+        
+        // Título del reporte alineado a la derecha
+        doc.fillColor('#18181b').fontSize(16).font('Helvetica-Bold');
+        doc.text('Reporte de Inventario Ciego', 200, 50, { align: 'right' });
+        
+        // Fecha del reporte
+        const currentDate = new Date().toLocaleDateString('es-ES', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+        doc.fillColor('#71717a').fontSize(10).font('Helvetica');
+        doc.text(`Fecha de emisión: ${currentDate}`, 200, 70, { align: 'right' });
 
-        // Definimos las posiciones de las columnas (X)
-        const nameX = 40;
-        const categoryX = 250;
+        // Línea separadora del header
+        doc.moveTo(50, 110).lineTo(545, 110).lineWidth(1).strokeColor('#e4e4e7').stroke();
+        
+        // ================= TABLA =================
+        const startY = 140;
+        let y = startY;
+        
+        // Configuración de columnas
+        const nameX = 50;
+        const categoryX = 260;
         const theoreticalX = 380;
-        const physicalX = 480;
-        let y = 100; // Posición Y inicial de la tabla
+        const physicalX = 470;
 
-        // Imprimir cabeceras de tabla
-        doc.fontSize(12).font('Helvetica-Bold');
-        doc.text('Nombre', nameX, y);
+        // Fondo de cabecera de tabla
+        doc.rect(50, y - 5, 495, 25).fill('#f4f4f5');
+        
+        // Textos de cabecera
+        doc.fillColor('#3f3f46').fontSize(10).font('Helvetica-Bold');
+        doc.text('Nombre del Producto', nameX, y);
         doc.text('Categoría', categoryX, y);
         doc.text('Stock Teórico', theoreticalX, y);
         doc.text('Conteo Físico', physicalX, y);
 
-        // Línea divisoria
-        doc.moveTo(40, y + 15).lineTo(550, y + 15).stroke();
+        y += 30; // Mover el cursor debajo de la cabecera
 
-        y += 30; // Bajamos el cursor Y
+        // Filas de datos
         doc.font('Helvetica').fontSize(10);
 
-        products.forEach((p) => {
-          // Si nos acercamos al final de la hoja, creamos otra nueva
+        products.forEach((p, index) => {
           if (y > 750) { 
             doc.addPage();
-            y = 50;
+            y = 50; // Reiniciar Y en la nueva página
           }
           
-          doc.text(p.name.substring(0, 30), nameX, y);
-          doc.text(p.category, categoryX, y);
-          doc.text(p.current_stock.toString(), theoreticalX, y);
+          doc.fillColor('#27272a');
+          doc.text(p.name.substring(0, 35), nameX, y);
           
-          // Línea para que escriban el conteo físico a mano
-          doc.moveTo(physicalX, y + 10).lineTo(physicalX + 70, y + 10).stroke();
+          doc.fillColor('#52525b');
+          doc.text(p.category, categoryX, y);
+          
+          doc.fillColor('#27272a').font('Helvetica-Bold');
+          doc.text(p.current_stock.toString(), theoreticalX, y);
+          doc.font('Helvetica'); // Resetear fuente para que el resto no sea Bold
+          
+          // Línea para escritura manual del conteo (estilo limpio)
+          doc.moveTo(physicalX, y + 10).lineTo(physicalX + 60, y + 10).lineWidth(0.5).strokeColor('#a1a1aa').stroke();
+          
+          // Línea separadora de filas muy sutil
+          doc.moveTo(50, y + 15).lineTo(545, y + 15).lineWidth(0.5).strokeColor('#f4f4f5').stroke();
 
           y += 25; // Espaciado entre filas
         });
+
+        // ================= FOOTER =================
+        doc.fontSize(8).fillColor('#a1a1aa');
+        doc.text('Generado automáticamente por La Casona Eventos', 50, 800, { align: 'center' });
 
         doc.end();
       } catch (error) {
