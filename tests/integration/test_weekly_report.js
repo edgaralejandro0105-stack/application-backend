@@ -1,6 +1,6 @@
 require('dotenv').config();
-const cronService = require('./src/services/cron.service');
-const { sequelize } = require('./src/models');
+const cronService = require('../../src/services/cron.service');
+const { sequelize } = require('../../src/models');
 
 async function forceWeeklyReport() {
   try {
