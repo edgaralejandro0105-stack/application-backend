@@ -29,6 +29,10 @@ const Product = db.define('Product', {
   min_stock: {
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  unit_price: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0.00
   }
 }, {
   tableName: 'products',

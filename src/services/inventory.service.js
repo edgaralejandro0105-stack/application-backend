@@ -4,7 +4,24 @@ const AppError = require('../utils/AppError');
 
 class InventoryService {
   async createInventoryItem(data) {
-    return await InventoryBar.create(data);
+    const item = await InventoryBar.create(data);
+    const Product = require('../models/Product.model');
+    const product = await Product.findByPk(data.product_id);
+    if (product) {
+      const quantity = parseFloat(data.quantity);
+      if (data.movement_type === 'Entry') {
+        product.current_stock = parseFloat(product.current_stock || 0) + quantity;
+      } else if (data.movement_type === 'Exit') {
+        product.current_stock = parseFloat(product.current_stock || 0) - quantity;
+      } else if (data.movement_type === 'Adjustment') {
+        product.current_stock = quantity;
+      }
+      if (data.unit_price) {
+        product.unit_price = parseFloat(data.unit_price);
+      }
+      await product.save();
+    }
+    return item;
   }
 
   async getAllInventoryItems(query) {

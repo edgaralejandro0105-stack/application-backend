@@ -24,6 +24,7 @@ const eventStaffRoutes = require('./routes/event-staff.routes');
 const serviceExternalRoutes = require('./routes/service-external.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const reportsRoutes = require('./routes/reports.routes');
+const providersRoutes = require('./routes/providers.routes');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -81,6 +82,7 @@ app.use('/api/event-staff', eventStaffRoutes);
 app.use('/api/service-external', serviceExternalRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/providers', providersRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
