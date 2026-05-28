@@ -20,3 +20,33 @@ exports.getInventoryPDF = catchAsync(async (req, res) => {
   
   res.send(buffer);
 });
+
+// --- NUEVOS CONTROLADORES DE PDF --- //
+
+exports.getClientsPDF = catchAsync(async (req, res) => {
+  const buffer = await reportService.generateClientsPDF();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=clientes.pdf');
+  res.send(buffer);
+});
+
+exports.getProvidersPDF = catchAsync(async (req, res) => {
+  const buffer = await reportService.generateProvidersPDF();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=proveedores.pdf');
+  res.send(buffer);
+});
+
+exports.getSalesPDF = catchAsync(async (req, res) => {
+  const buffer = await reportService.generateSalesPDF();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=ventas.pdf');
+  res.send(buffer);
+});
+
+exports.getEmployeesPDF = catchAsync(async (req, res) => {
+  const buffer = await reportService.generateEmployeesPDF();
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=empleados.pdf');
+  res.send(buffer);
+});

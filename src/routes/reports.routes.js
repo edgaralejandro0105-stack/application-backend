@@ -8,4 +8,10 @@ router.get('/inventory/excel', reportController.getInventoryExcel);
 // GET /api/reports/inventory/pdf
 router.get('/inventory/pdf', reportController.getInventoryPDF);
 
+// Nuevas rutas PDF
+router.get('/clients/pdf', reportController.getClientsPDF);
+router.get('/providers/pdf', reportController.getProvidersPDF);
+router.get('/sales/pdf', reportController.getSalesPDF);
+router.get('/employees/pdf', reportController.getEmployeesPDF);
+
 module.exports = router;

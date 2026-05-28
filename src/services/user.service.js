@@ -22,8 +22,14 @@ class UserService {
     const user = await User.findByPk(id);
     if (!user) throw new AppError('Usuario no encontrado', 404);
 
-    // Nunca actualizar la contraseña por esta vía
-    const { password, ...updateData } = data;
+    const updateData = { ...data };
+    
+    // Si se envía una contraseña, encriptarla
+    if (updateData.password) {
+      const crypto = require('crypto');
+      updateData.password = crypto.createHash('sha256').update(updateData.password).digest('hex');
+    }
+
     await user.update(updateData);
     return user;
   }

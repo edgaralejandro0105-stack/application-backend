@@ -1,6 +1,6 @@
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
-const { Product } = require('../models');
+const { Product, Client, Provider, Sale, Employee } = require('../models');
 
 class ReportService {
   async getActiveProducts() {
@@ -128,7 +128,6 @@ class ReportService {
           y += 25; // Espaciado entre filas
         });
 
-        // ================= FOOTER =================
         doc.fontSize(8).fillColor('#a1a1aa');
         doc.text('Generado automáticamente por La Casona Eventos', 50, 800, { align: 'center' });
 
@@ -137,6 +136,120 @@ class ReportService {
         reject(error);
       }
     });
+  }
+
+  // --- MÉTODOS DE EXPORTACIÓN A PDF PARA OTROS MÓDULOS --- //
+  
+  _generateBasePDF(title, headers, dataRows, columnWidths) {
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+        let buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => {
+          resolve(Buffer.concat(buffers));
+        });
+
+        // HEADER
+        doc.fillColor('#18181b').fontSize(24).font('Helvetica-Bold');
+        doc.text('LA CASONA', 50, 50);
+        doc.fillColor('#71717a').fontSize(10).font('Helvetica');
+        doc.text('Sistema Integrado de Gestión Empresarial', 50, 78);
+        doc.fillColor('#18181b').fontSize(16).font('Helvetica-Bold');
+        doc.text(title, 200, 50, { align: 'right' });
+        
+        const currentDate = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        doc.fillColor('#71717a').fontSize(10).font('Helvetica');
+        doc.text(`Fecha de emisión: ${currentDate}`, 200, 70, { align: 'right' });
+
+        doc.moveTo(50, 110).lineTo(545, 110).lineWidth(1).strokeColor('#e4e4e7').stroke();
+
+        // TABLA HEADER
+        let y = 140;
+        doc.rect(50, y - 5, 495, 25).fill('#f4f4f5');
+        doc.fillColor('#3f3f46').fontSize(10).font('Helvetica-Bold');
+        
+        headers.forEach((h, i) => {
+          doc.text(h, columnWidths[i], y);
+        });
+
+        y += 30;
+        
+        // TABLA DATOS
+        doc.font('Helvetica').fontSize(10);
+        dataRows.forEach(row => {
+          if (y > 750) { 
+            doc.addPage();
+            y = 50; 
+          }
+          row.forEach((text, i) => {
+            doc.fillColor('#27272a');
+            doc.text(String(text).substring(0, 40), columnWidths[i], y);
+          });
+          doc.moveTo(50, y + 15).lineTo(545, y + 15).lineWidth(0.5).strokeColor('#f4f4f5').stroke();
+          y += 25;
+        });
+
+        // FOOTER
+        doc.fontSize(8).fillColor('#a1a1aa');
+        doc.text('Generado automáticamente por La Casona Eventos', 50, 800, { align: 'center' });
+        doc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  async generateClientsPDF() {
+    const clients = await Client.findAll({ order: [['name', 'ASC']] });
+    const headers = ['Nombre', 'Documento', 'Teléfono', 'Dirección'];
+    const dataRows = clients.map(c => [
+      `${c.name} ${c.last_name}`, 
+      c.doc_id, 
+      c.phone || 'N/A', 
+      c.direction || 'N/A'
+    ]);
+    const columnWidths = [50, 200, 300, 400];
+    return this._generateBasePDF('Reporte de Clientes', headers, dataRows, columnWidths);
+  }
+
+  async generateProvidersPDF() {
+    const providers = await Provider.findAll({ order: [['name', 'ASC']] });
+    const headers = ['Razón Social', 'Contacto', 'Teléfono', 'Estado'];
+    const dataRows = providers.map(p => [
+      p.name, 
+      p.contact_name || 'N/A', 
+      p.phone || 'N/A', 
+      p.status === 'active' ? 'Activo' : 'Inactivo'
+    ]);
+    const columnWidths = [50, 250, 380, 480];
+    return this._generateBasePDF('Reporte de Proveedores', headers, dataRows, columnWidths);
+  }
+
+  async generateSalesPDF() {
+    const sales = await Sale.findAll({ order: [['create_at', 'DESC']] });
+    const headers = ['ID Venta', 'Total', 'Fecha'];
+    const dataRows = sales.map(s => [
+      `#${s.sale_id}`, 
+      `$${Number(s.total).toFixed(2)}`, 
+      new Date(s.create_at).toLocaleDateString()
+    ]);
+    const columnWidths = [50, 250, 400];
+    return this._generateBasePDF('Reporte de Ventas', headers, dataRows, columnWidths);
+  }
+
+  async generateEmployeesPDF() {
+    const employees = await Employee.findAll({ order: [['first_name', 'ASC']] });
+    const headers = ['Nombre', 'Teléfono', 'Email', 'Rol', 'Estado'];
+    const dataRows = employees.map(e => [
+      `${e.first_name} ${e.last_name}`, 
+      e.phone || 'N/A', 
+      e.email || 'N/A', 
+      e.rol || 'N/A',
+      e.status === 'active' ? 'Activo' : 'Inactivo'
+    ]);
+    const columnWidths = [50, 180, 280, 400, 480];
+    return this._generateBasePDF('Reporte de Empleados', headers, dataRows, columnWidths);
   }
 }
 

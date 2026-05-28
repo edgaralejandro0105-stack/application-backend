@@ -72,6 +72,13 @@ class EmailService {
         to,
         subject,
         html: finalHtml,
+        attachments: [
+          {
+            filename: 'logo2.png',
+            path: path.join(__dirname, '../templates/logo2.png'),
+            cid: 'logo_casona'
+          }
+        ]
       };
 
       const info = await mailTransporter.sendMail(mailOptions);
