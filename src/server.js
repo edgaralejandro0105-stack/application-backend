@@ -29,6 +29,8 @@ const providersRoutes = require('./routes/providers.routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
+const server = require('http').createServer(app);
+
 
 // Rate Limiting
 const limiter = rateLimit({
@@ -60,6 +62,18 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
+
+// Configuración de Socket.io
+const { Server } = require('socket.io');
+const io = new Server(server, { cors: corsOptions });
+app.set('io', io);
+
+io.on('connection', (socket) => {
+    console.log(`🔌 Cliente de Socket conectado: ${socket.id}`);
+    socket.on('disconnect', () => {
+        console.log(`🔌 Cliente de Socket desconectado: ${socket.id}`);
+    });
+});
 
 app.use(express.json());
 app.use(morgan('dev'));
@@ -130,6 +144,13 @@ async function startServer() {
             `ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires TIMESTAMP WITH TIME ZONE;`
         ).catch(() => { });
 
+        // 4. Añadir nuevos estados al ENUM de eventos (Lead, Finished)
+        await sequelize.query(`ALTER TYPE "enum_events_status" ADD VALUE IF NOT EXISTS 'Lead';`).catch(() => { });
+        await sequelize.query(`ALTER TYPE "enum_events_status" ADD VALUE IF NOT EXISTS 'Finished';`).catch(() => { });
+
+        // 5. Agregar la columna guests a la tabla events si no existe
+        await sequelize.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS guests INTEGER DEFAULT 0;`).catch(() => { });
+
         // ─── Sincronización normal ─────────────────────────────────────────────
         // sync() crea tablas que falten pero NO altera las existentes.
         // Esto evita conflictos de ENUM entre tipos user_status y enum_users_status.
@@ -139,7 +160,7 @@ async function startServer() {
         // [MODIFICACIÓN PARA TESTS]: Verificamos si este archivo se ejecuta directamente con Node o si es importado.
         // Si es importado por Jest/Supertest, NO iniciamos el servidor en el puerto para evitar el error "EADDRINUSE".
         if (require.main === module) {
-            app.listen(PORT, () => {
+            server.listen(PORT, () => {
                 console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 
                 // Inicializar tareas programadas (Cron Jobs)

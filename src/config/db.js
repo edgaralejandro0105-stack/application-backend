@@ -20,6 +20,7 @@ const dialectOptions = isLocal ? {} : {
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres', // Indicamos que el motor de base de datos es PostgreSQL
   logging: false,      // Apagamos los logs de SQL en consola para que no se ensucie la terminal
+  timezone: '+00:00',  // Forzamos a Sequelize a tratar las fechas en UTC para evitar saltos de día
   pool: {
     // Configuramos el "Pool" (grupo) de conexiones para optimizar el rendimiento
     max: 5,           // Máximo 5 conexiones abiertas al mismo tiempo

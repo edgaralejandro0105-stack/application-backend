@@ -29,8 +29,12 @@ const Event = db.define('Event', {
     type: DataTypes.STRING(20),
     allowNull: false
   },
+  guests: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
   status: {
-    type: DataTypes.ENUM('Confirmed', 'Pending', 'On Hold', 'Cancelled'),
+    type: DataTypes.ENUM('Confirmed', 'Pending', 'On Hold', 'Cancelled', 'Lead', 'Finished'),
     defaultValue: 'Pending'
   }
 }, {

@@ -5,11 +5,15 @@ const router = express.Router();
 // Importamos el controlador, que tiene la lógica que se ejecutará cuando visiten estas rutas
 const eventController = require('../controllers/eventController');
 const validateSchema = require('../middleware/validateSchema');
-const { createEventSchema } = require('../schemas/event.schema');
+const { createEventSchema, createWebsiteReservationSchema } = require('../schemas/event.schema');
 
 // URL base: /api/events
 // POST: Crea un nuevo evento validando primero los datos con Zod
 router.post('/', validateSchema(createEventSchema), eventController.createEvent);
+
+// POST para pre-reservas de la web
+router.post('/website', validateSchema(createWebsiteReservationSchema), eventController.createWebsiteReservation);
+
 router.get('/', eventController.getAllEvents);       // GET: Pide todos los eventos
 router.get('/:id', eventController.getEventById);    // GET (con /:id): Pide un evento en específico usando su ID
 router.put('/:id', eventController.updateEvent);     // PUT: Actualiza/Modifica un evento existente por ID

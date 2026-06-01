@@ -14,6 +14,7 @@
     "pdfkit": "^0.18.0",
     "pg": "^8.20.0",
     "sequelize": "^6.37.8",
+    "socket.io": "^4.8.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -28,7 +29,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["./tests/setup.js"],
+    "setupFilesAfterEnv": [
+      "./tests/setup.js"
+    ],
     "testTimeout": 30000
   }
 }

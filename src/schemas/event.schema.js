@@ -9,4 +9,19 @@ const createEventSchema = z.object({
   status: z.enum(['Confirmed', 'Pending', 'On Hold', 'Cancelled']).optional()
 });
 
-module.exports = { createEventSchema };
+const createWebsiteReservationSchema = z.object({
+  salon: z.string({ required_error: "El salón es obligatorio" }),
+  horario: z.string({ required_error: "El horario es obligatorio" }),
+  fecha: z.string({ required_error: "La fecha es obligatoria" }),
+  tipo: z.string({ required_error: "El tipo de evento es obligatorio" }),
+  descripcion: z.string().optional(),
+  servicios: z.any().optional(),
+  personal: z.any().optional(),
+  contacto: z.object({
+    nombre: z.string({ required_error: "El nombre es obligatorio" }),
+    telefono: z.string({ required_error: "El teléfono es obligatorio" }),
+    correo: z.string().email("Correo inválido").optional().or(z.literal(''))
+  })
+});
+
+module.exports = { createEventSchema, createWebsiteReservationSchema };
