@@ -17,12 +17,17 @@ const User = require('./User.model');
 const Venue = require('./Venue.model');
 const Provider = require('./Provider.model');
 const Catalog = require('./Catalog.model');
+const Notification = require('./Notification.model');
 
 // Definir Asociaciones
 
 // User - Role
 Role.hasMany(User, { foreignKey: 'role_id' });
 User.belongsTo(Role, { foreignKey: 'role_id' });
+
+// User - Notification
+User.hasMany(Notification, { foreignKey: 'user_id' });
+Notification.belongsTo(User, { foreignKey: 'user_id' });
 
 // Catalog - Provider & Product
 Provider.hasMany(Catalog, { foreignKey: 'provider_id' });
@@ -81,5 +86,6 @@ module.exports = {
   User,
   Venue,
   Provider,
-  Catalog
+  Catalog,
+  Notification
 };

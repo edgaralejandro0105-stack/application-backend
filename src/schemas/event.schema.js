@@ -6,7 +6,7 @@ const createEventSchema = z.object({
   start_date: z.string({ required_error: "La fecha de inicio es obligatoria" }),
   end_date: z.string({ required_error: "La fecha de fin es obligatoria" }),
   type_event: z.string({ required_error: "El tipo de evento es obligatorio" }).max(20),
-  status: z.enum(['Confirmed', 'Pending', 'On Hold', 'Cancelled']).optional()
+  status: z.enum(['Confirmed', 'Pending', 'On Hold', 'Cancelled', 'Lead', 'Finished']).optional()
 });
 
 const createWebsiteReservationSchema = z.object({

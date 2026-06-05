@@ -7,7 +7,10 @@ class ServiceExternalService {
   }
 
   async getAllServiceExternal() {
-    return await ServiceExternal.findAll({ order: [['service_id', 'DESC']] });
+    return await ServiceExternal.findAll({ 
+      where: { is_active: true },
+      order: [['service_id', 'DESC']] 
+    });
   }
 
   async getServiceExternalById(id) {
@@ -35,7 +38,7 @@ class ServiceExternalService {
   async deleteServiceExternal(id) {
     const service = await ServiceExternal.findByPk(id);
     if (!service) throw new AppError('Servicio externo no encontrado', 404);
-    await service.destroy();
+    await service.update({ is_active: false });
     return true;
   }
 }

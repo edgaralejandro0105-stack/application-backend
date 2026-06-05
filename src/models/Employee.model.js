@@ -37,6 +37,11 @@ const Employee = db.define('Employee', {
   rol: {
     type: DataTypes.STRING
   },
+  salary_per_event: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.00
+  },
   status: {
     type: DataTypes.ENUM('active', 'inactive', 'suspended'),
     defaultValue: 'active'
@@ -45,9 +50,7 @@ const Employee = db.define('Employee', {
   tableName: 'employees',
   timestamps: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  paranoid: true,
-  deletedAt: 'deleted_at'
+  updatedAt: 'updated_at'
 });
 
 // Relaciones técnicas

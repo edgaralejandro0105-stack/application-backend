@@ -40,12 +40,14 @@ const User = db.define('User', {
   reset_password_expires: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
 }, {
   tableName: 'users',
-  timestamps: true,
-  createdAt: 'create_at',
-  updatedAt: 'update_at'
+  timestamps: false
 });
 
 // Relación técnica: Un usuario PERTENECE a un Rol

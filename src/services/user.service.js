@@ -4,6 +4,7 @@ const AppError = require('../utils/AppError');
 class UserService {
   async getAllUsers() {
     return await User.findAll({
+      where: { is_active: true },
       attributes: { exclude: ['password'] },
       include: [{ model: Role, attributes: ['role_name', 'access'] }]
     });
@@ -37,7 +38,7 @@ class UserService {
   async deleteUser(id) {
     const user = await User.findByPk(id);
     if (!user) throw new AppError('Usuario no encontrado', 404);
-    await user.destroy();
+    await user.update({ is_active: false });
     return true;
   }
 }

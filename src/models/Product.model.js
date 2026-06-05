@@ -33,12 +33,16 @@ const Product = db.define('Product', {
   unit_price: {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0.00
+  },
+  image_url: {
+    type: DataTypes.STRING(255),
+    allowNull: true
   }
 }, {
   tableName: 'products',
   timestamps: true,
-  createdAt: 'create_at',
-  updatedAt: 'update_at',
+  createdAt: false,
+  updatedAt: false,
   paranoid: true,
   deletedAt: 'deleted_at'
 });

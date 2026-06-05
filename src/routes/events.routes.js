@@ -14,6 +14,9 @@ router.post('/', validateSchema(createEventSchema), eventController.createEvent)
 // POST para pre-reservas de la web
 router.post('/website', validateSchema(createWebsiteReservationSchema), eventController.createWebsiteReservation);
 
+// GET para consultar el estado de la pre-reserva por teléfono
+router.get('/website/status', eventController.getWebsiteReservationStatus);
+
 router.get('/', eventController.getAllEvents);       // GET: Pide todos los eventos
 router.get('/:id', eventController.getEventById);    // GET (con /:id): Pide un evento en específico usando su ID
 router.put('/:id', eventController.updateEvent);     // PUT: Actualiza/Modifica un evento existente por ID

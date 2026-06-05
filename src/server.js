@@ -25,6 +25,8 @@ const serviceExternalRoutes = require('./routes/service-external.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const reportsRoutes = require('./routes/reports.routes');
 const providersRoutes = require('./routes/providers.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const rolesRoutes = require('./routes/roles.routes');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -97,6 +99,8 @@ app.use('/api/service-external', serviceExternalRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/providers', providersRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/roles', rolesRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -147,9 +151,37 @@ async function startServer() {
         // 4. Añadir nuevos estados al ENUM de eventos (Lead, Finished)
         await sequelize.query(`ALTER TYPE "enum_events_status" ADD VALUE IF NOT EXISTS 'Lead';`).catch(() => { });
         await sequelize.query(`ALTER TYPE "enum_events_status" ADD VALUE IF NOT EXISTS 'Finished';`).catch(() => { });
+        await sequelize.query(`ALTER TYPE "event_status" ADD VALUE IF NOT EXISTS 'Lead';`).catch(() => { });
+        await sequelize.query(`ALTER TYPE "event_status" ADD VALUE IF NOT EXISTS 'Finished';`).catch(() => { });
 
         // 5. Agregar la columna guests a la tabla events si no existe
         await sequelize.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS guests INTEGER DEFAULT 0;`).catch(() => { });
+
+        // 6. Agregar la columna email a la tabla clients
+        await sequelize.query(`ALTER TABLE clients ADD COLUMN IF NOT EXISTS email VARCHAR(255);`).catch(() => { });
+
+        // 7. Ampliar phone a VARCHAR(50) en clients para soportar formatos internacionales
+        await sequelize.query(`ALTER TABLE clients ALTER COLUMN phone TYPE VARCHAR(50);`).catch(() => { });
+
+        // 8. Agregar is_active para Soft Delete
+        await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE venues ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE services_external ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;`).catch(() => { });
+
+        // 9. Nuevos campos visuales para frontend (products, events, venues)
+        await sequelize.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(255);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS title VARCHAR(100);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS description TEXT;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS dj VARCHAR(100);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS image_url VARCHAR(255);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE venues ADD COLUMN IF NOT EXISTS description TEXT;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE venues ADD COLUMN IF NOT EXISTS image_url VARCHAR(255);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE services_external ADD COLUMN IF NOT EXISTS description TEXT;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE services_external ADD COLUMN IF NOT EXISTS image_url VARCHAR(255);`).catch(() => { });
+
+        // Planner Pricing
+        await sequelize.query(`ALTER TABLE venues ADD COLUMN IF NOT EXISTS base_price DECIMAL(10, 2) DEFAULT 0.00;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE employees ADD COLUMN IF NOT EXISTS salary_per_event DECIMAL(10, 2) DEFAULT 0.00;`).catch(() => { });
 
         // ─── Sincronización normal ─────────────────────────────────────────────
         // sync() crea tablas que falten pero NO altera las existentes.

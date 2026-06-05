@@ -8,7 +8,7 @@ class VenueService {
     const limit = parseInt(query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
-    const where = {};
+    const where = { is_active: true };
     if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
 
     const options = { where, limit, offset, order: [['name', 'ASC']] };
@@ -38,7 +38,7 @@ class VenueService {
   async deleteVenue(id) {
     const venue = await Venue.findByPk(id);
     if (!venue) throw new AppError('Salón no encontrado', 404);
-    await venue.destroy();
+    await venue.update({ is_active: false });
     return true;
   }
 }

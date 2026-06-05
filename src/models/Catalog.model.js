@@ -25,9 +25,7 @@ const Catalog = db.define('Catalog', {
   }
 }, {
   tableName: 'catalogs',
-  timestamps: true,
-  createdAt: 'create_at',
-  updatedAt: 'update_at'
+  timestamps: false
 });
 
 module.exports = Catalog;

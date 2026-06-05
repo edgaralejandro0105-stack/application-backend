@@ -4,10 +4,15 @@ const AppError = require('../utils/AppError');
 
 class InventoryService {
   async createInventoryItem(data) {
-    const item = await InventoryBar.create(data);
     const Product = require('../models/Product.model');
     const product = await Product.findByPk(data.product_id);
+    
     if (product) {
+      // Si el movimiento no trae precio, tomamos el del catálogo para guardar el registro histórico
+      if (data.unit_price === undefined || data.unit_price === null) {
+        data.unit_price = product.unit_price;
+      }
+      
       const quantity = parseFloat(data.quantity);
       if (data.movement_type === 'Entry') {
         product.current_stock = parseFloat(product.current_stock || 0) + quantity;
@@ -16,11 +21,10 @@ class InventoryService {
       } else if (data.movement_type === 'Adjustment') {
         product.current_stock = quantity;
       }
-      if (data.unit_price) {
-        product.unit_price = parseFloat(data.unit_price);
-      }
       await product.save();
     }
+    
+    const item = await InventoryBar.create(data);
     return item;
   }
 

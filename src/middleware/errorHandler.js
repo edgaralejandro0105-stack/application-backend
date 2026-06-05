@@ -20,6 +20,12 @@ const handleZodError = (err) => {
 
 const handleSequelizeForeignKeyConstraintError = (err) => {
   const table = err.parent && err.parent.table ? err.parent.table : 'otro registro';
+  
+  if (err.sql && (err.sql.includes('INSERT') || err.sql.includes('UPDATE'))) {
+    const message = `Error: Has seleccionado una opción que no existe en el sistema.`;
+    return new AppError(message, 400);
+  }
+
   const message = `No se puede eliminar este registro porque está referenciado en la tabla "${table}". Elimine los registros relacionados primero.`;
   return new AppError(message, 409);
 };

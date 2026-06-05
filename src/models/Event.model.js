@@ -25,6 +25,22 @@ const Event = db.define('Event', {
     type: DataTypes.DATE,
     allowNull: false
   },
+  title: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  dj: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  image_url: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
   type_event: {
     type: DataTypes.STRING(20),
     allowNull: false

@@ -20,9 +20,7 @@ const Role = db.define('Role', {
   }
 }, {
   tableName: 'rol',
-  timestamps: true,
-  createdAt: 'create_at',
-  updatedAt: 'update_at'
+  timestamps: false
 });
 
 module.exports = Role;

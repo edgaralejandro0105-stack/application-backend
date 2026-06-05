@@ -30,9 +30,7 @@ const Provider = db.define('Provider', {
   }
 }, {
   tableName: 'providers',
-  timestamps: true,
-  createdAt: 'create_at',
-  updatedAt: 'update_at'
+  timestamps: false
 });
 
 module.exports = Provider;

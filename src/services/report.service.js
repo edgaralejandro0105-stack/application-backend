@@ -251,6 +251,93 @@ class ReportService {
     const columnWidths = [50, 180, 280, 400, 480];
     return this._generateBasePDF('Reporte de Empleados', headers, dataRows, columnWidths);
   }
+
+  generateEventContractPDF(event) {
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+        let buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+
+        // HEADER
+        doc.fillColor('#18181b').fontSize(24).font('Helvetica-Bold');
+        doc.text('LA CASONA', 50, 50);
+        doc.fillColor('#71717a').fontSize(10).font('Helvetica');
+        doc.text('Confirmación y Detalles de Evento', 50, 78);
+        doc.fillColor('#18181b').fontSize(16).font('Helvetica-Bold');
+        doc.text(`Evento #${event.event_id}`, 200, 50, { align: 'right' });
+        
+        const currentDate = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+        doc.fillColor('#71717a').fontSize(10).font('Helvetica');
+        doc.text(`Fecha de emisión: ${currentDate}`, 200, 70, { align: 'right' });
+
+        doc.moveTo(50, 110).lineTo(545, 110).lineWidth(1).strokeColor('#e4e4e7').stroke();
+
+        // CLIENT DETAILS
+        let y = 140;
+        doc.fillColor('#18181b').fontSize(14).font('Helvetica-Bold').text('Datos del Cliente', 50, y);
+        y += 25;
+        doc.fontSize(10).font('Helvetica').fillColor('#27272a');
+        doc.text(`Nombre: ${event.Client?.name || ''} ${event.Client?.last_name || ''}`, 50, y);
+        doc.text(`Documento: ${event.Client?.doc_id || 'N/A'}`, 300, y);
+        y += 20;
+        doc.text(`Teléfono: ${event.Client?.phone || 'N/A'}`, 50, y);
+        doc.text(`Correo: ${event.Client?.email || 'N/A'}`, 300, y);
+        
+        y += 40;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(0.5).strokeColor('#e4e4e7').stroke();
+        y += 20;
+
+        // EVENT DETAILS
+        doc.fillColor('#18181b').fontSize(14).font('Helvetica-Bold').text('Detalles del Evento', 50, y);
+        y += 25;
+        doc.fontSize(10).font('Helvetica').fillColor('#27272a');
+        
+        // Manejo de fecha seguro
+        let startDate = 'N/A', endDate = 'N/A';
+        try {
+            startDate = new Date(event.start_date).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
+            endDate = new Date(event.end_date).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
+        } catch(e) {}
+
+        doc.text(`Tipo de Evento: ${event.type_event || 'N/A'}`, 50, y);
+        doc.text(`Salón: ${event.Venue?.name || 'N/A'}`, 300, y);
+        y += 20;
+        doc.text(`Inicio: ${startDate}`, 50, y);
+        doc.text(`Fin: ${endDate}`, 300, y);
+
+        y += 40;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(0.5).strokeColor('#e4e4e7').stroke();
+        y += 20;
+
+        // SERVICES
+        doc.fillColor('#18181b').fontSize(14).font('Helvetica-Bold').text('Servicios Contratados', 50, y);
+        y += 25;
+        if (event.EventItems && event.EventItems.length > 0) {
+          event.EventItems.forEach((item) => {
+            const svc = item.ServiceExternal;
+            doc.fontSize(10).font('Helvetica').fillColor('#27272a');
+            doc.text(`- ${svc?.name || 'Servicio'} (${svc?.service_type || 'General'})`, 50, y);
+            y += 20;
+          });
+        } else {
+          doc.fontSize(10).font('Helvetica-Oblique').fillColor('#71717a');
+          doc.text('No hay servicios externos contratados para este evento.', 50, y);
+          y += 20;
+        }
+
+        // FOOTER
+        doc.fontSize(8).fillColor('#a1a1aa').font('Helvetica');
+        doc.text('Este documento es un comprobante automatizado de su evento en La Casona.', 50, 780, { align: 'center' });
+        doc.text('Generado automáticamente por La Casona Eventos', 50, 795, { align: 'center' });
+
+        doc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 module.exports = new ReportService();

@@ -21,6 +21,18 @@ const ServiceExternal = db.define('ServiceExternal', {
   provider_info: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  image_url: {
+    type: DataTypes.STRING(255),
+    allowNull: true
   }
 }, {
   tableName: 'services_external',

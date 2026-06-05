@@ -17,17 +17,30 @@ const Venue = db.define('Venue', {
     // Nota: El diagrama indicaba int(200), en Postgres es INTEGER 
     // y la validación de límite se hace en el controlador.
   },
+  base_price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.00
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  image_url: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
   status: {
     type: DataTypes.ENUM('Available', 'Occupied', 'Maintenance', 'Reserved'),
     defaultValue: 'Available'
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
 }, {
   tableName: 'venues',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at',
-  paranoid: true,
-  deletedAt: 'deleted_at'
+  timestamps: false
 });
 
 module.exports = Venue;

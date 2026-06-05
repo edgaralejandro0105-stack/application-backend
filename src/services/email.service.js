@@ -58,7 +58,7 @@ class EmailService {
     return compiledBase;
   }
 
-  async sendEmail({ to, subject, templateName, context, html }) {
+  async sendEmail({ to, subject, templateName, context, html, attachments = [] }) {
     try {
       const mailTransporter = await getTransporter();
       
@@ -67,18 +67,20 @@ class EmailService {
         finalHtml = this.compileTemplate(templateName, context);
       }
 
+      const defaultAttachments = [
+        {
+          filename: 'logo2.png',
+          path: path.join(__dirname, '../templates/logo2.png'),
+          cid: 'logo_casona'
+        }
+      ];
+
       const mailOptions = {
-        from: '"La Casona API" <no-reply@lacasona.com>',
+        from: '"La Casona Eventos" <no-reply@lacasona.com>',
         to,
         subject,
         html: finalHtml,
-        attachments: [
-          {
-            filename: 'logo2.png',
-            path: path.join(__dirname, '../templates/logo2.png'),
-            cid: 'logo_casona'
-          }
-        ]
+        attachments: [...defaultAttachments, ...attachments]
       };
 
       const info = await mailTransporter.sendMail(mailOptions);

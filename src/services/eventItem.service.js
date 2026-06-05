@@ -3,6 +3,12 @@ const AppError = require('../utils/AppError');
 
 class EventItemService {
   async createEventItem(data) {
+    if (data.service_id && (data.final_price === undefined || data.final_price === null)) {
+      const service = await ServiceExternal.findByPk(data.service_id);
+      if (service && service.base_price) {
+        data.final_price = service.base_price;
+      }
+    }
     return await EventItem.create(data);
   }
 

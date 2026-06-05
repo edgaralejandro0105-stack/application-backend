@@ -77,19 +77,35 @@ class EventService {
     const name = nameParts[0] || 'Desconocido';
     const lastName = nameParts.slice(1).join(' ') || 'N/A';
     
-    let client = await Client.findOne({ where: { phone: data.contacto.telefono } });
+    let client = await Client.findOne({
+      where: {
+        [Op.or]: [
+          { phone: data.contacto.telefono },
+          data.contacto.correo ? { email: data.contacto.correo.trim().toLowerCase() } : null
+        ].filter(Boolean)
+      }
+    });
     if (!client) {
       client = await Client.create({
         name: name,
         last_name: lastName,
         doc_id: 'WEB-' + Date.now().toString().slice(-6),
-        phone: data.contacto.telefono
+        phone: data.contacto.telefono,
+        email: data.contacto.correo ? data.contacto.correo.trim().toLowerCase() : null
       });
+    } else {
+      if (data.contacto.correo && !client.email) {
+        await client.update({ email: data.contacto.correo.trim().toLowerCase() });
+      }
     }
 
     // 2. Resolve Venue
     let venue = await Venue.findOne({ where: { name: { [Op.iLike]: `%${data.salon}%` } } });
-    const venueId = venue ? venue.venue_id : 1;
+    if (!venue) {
+      // Si no encuentra el salón por nombre (ej. dice "Ambos" o el nombre no cuadra exacto), tomar el primero activo
+      venue = await Venue.findOne({ order: [['venue_id', 'ASC']] });
+    }
+    const venueId = venue ? venue.venue_id : null; // Si no hay ningún salón, fallará (lo cual es correcto)
 
     // 3. Resolve Dates (parsing YYYY-MM-DD safely to local timezone)
     const [year, month, day] = data.fecha.split('-').map(Number);
@@ -195,6 +211,33 @@ class EventService {
     if (!event) throw new AppError('Evento no encontrado', 404);
     await event.destroy();
     return true;
+  }
+
+  async getWebsiteReservationStatus(email) {
+    const trimmedEmail = email.trim().toLowerCase();
+    const client = await Client.findOne({ where: { email: trimmedEmail } });
+    if (!client) {
+      return { client: null, events: [] };
+    }
+    const events = await Event.findAll({
+      where: { client_id: client.client_id },
+      include: [{ model: Venue, attributes: ['name'] }],
+      order: [['start_date', 'DESC']]
+    });
+    return {
+      client: {
+        name: client.name,
+        last_name: client.last_name
+      },
+      events: events.map(e => ({
+        event_id: e.event_id,
+        start_date: e.start_date,
+        end_date: e.end_date,
+        type_event: e.type_event,
+        status: e.status,
+        venue: e.Venue ? e.Venue.name : 'N/A'
+      }))
+    };
   }
 }
 
