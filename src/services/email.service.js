@@ -13,6 +13,7 @@ async function getTransporter() {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: process.env.SMTP_PORT == 465, // true para 465 (SSL), false para 587 (TLS)
+    family: 4, // Fuerza a usar IPv4, soluciona el error ENETUNREACH en Render
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
