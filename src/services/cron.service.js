@@ -2,7 +2,6 @@ const cron = require('node-cron');
 const { Op } = require('sequelize');
 const emailService = require('./email.service');
 const { Product, Sale, sequelize } = require('../models');
-const moment = require('moment'); // O simplemente usar Vanilla JS Dates
 
 class CronService {
   init() {
