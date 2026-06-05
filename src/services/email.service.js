@@ -8,21 +8,18 @@ let transporter;
 async function getTransporter() {
   if (transporter) return transporter;
 
-  const isGmail = process.env.SMTP_HOST && process.env.SMTP_HOST.includes('gmail');
   const transportConfig = {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_PORT == 465, // true para 465 (SSL), false para 587 (TLS)
-    family: 4, // Fuerza a usar IPv4, soluciona el error ENETUNREACH en Render
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // false forces STARTTLS on port 587
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    tls: {
+      rejectUnauthorized: false
+    }
   };
-
-  if (isGmail) {
-    transportConfig.service = 'gmail';
-  }
 
   transporter = nodemailer.createTransport(transportConfig);
   return transporter;
