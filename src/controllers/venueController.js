@@ -7,6 +7,9 @@ exports.getAllVenues = catchAsync(async (req, res) => {
 });
 
 exports.createVenue = catchAsync(async (req, res) => {
+  if (req.file) {
+    req.body.image_url = req.file.path;
+  }
   const venue = await venueService.createVenue(req.body);
   res.status(201).json({ message: 'Salón creado correctamente', data: venue });
 });
@@ -17,6 +20,9 @@ exports.getVenueById = catchAsync(async (req, res) => {
 });
 
 exports.updateVenue = catchAsync(async (req, res) => {
+  if (req.file) {
+    req.body.image_url = req.file.path;
+  }
   const venue = await venueService.updateVenue(req.params.id, req.body);
   res.status(200).json({ message: 'Salón actualizado correctamente', data: venue });
 });

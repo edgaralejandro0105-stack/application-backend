@@ -2,6 +2,9 @@ const serviceExternalService = require('../services/serviceExternal.service');
 const catchAsync = require('../utils/catchAsync');
 
 exports.createServiceExternal = catchAsync(async (req, res) => {
+  if (req.file) {
+    req.body.image_url = req.file.path;
+  }
   const service = await serviceExternalService.createServiceExternal(req.body);
   res.status(201).json({ message: 'Servicio externo creado', data: service });
 });
@@ -22,6 +25,9 @@ exports.getServicesByEvent = catchAsync(async (req, res) => {
 });
 
 exports.updateServiceExternal = catchAsync(async (req, res) => {
+  if (req.file) {
+    req.body.image_url = req.file.path;
+  }
   const service = await serviceExternalService.updateServiceExternal(req.params.id, req.body);
   res.status(200).json({ message: 'Servicio externo actualizado', data: service });
 });
