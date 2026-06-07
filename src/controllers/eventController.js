@@ -23,7 +23,8 @@ exports.createWebsiteReservation = catchAsync(async (req, res) => {
     io.emit('new_reservation', newEvent.toJSON ? newEvent.toJSON() : newEvent);
   }
 
-  // Notificación por Correo
+  // Notificación por Correo (Desactivada - Ahora se maneja desde el Frontend con EmailJS para evitar duplicados)
+  /*
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@lacasona.com';
   const adminUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
   
@@ -58,6 +59,7 @@ exports.createWebsiteReservation = catchAsync(async (req, res) => {
       }
     }).catch(err => console.error('Error enviando correo de confirmación al cliente:', err));
   }
+  */
 
   res.status(201).json({ message: 'Pre-reserva web creada correctamente', data: newEvent });
 });
