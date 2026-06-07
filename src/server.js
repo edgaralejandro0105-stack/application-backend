@@ -31,6 +31,7 @@ const rolesRoutes = require('./routes/roles.routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
+app.set('trust proxy', 1);
 const server = require('http').createServer(app);
 
 
@@ -49,12 +50,13 @@ const allowedOrigins = [
     process.env.FRONTEND_URL,
     'http://localhost:5173',
     'http://localhost:3000',
-    'http://localhost:3001'
+    'http://localhost:3001',
+    'https://lacasonadisco.netlify.app'
 ].filter(Boolean);
 
 const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
+        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.startsWith('http://192.168.')) {
             callback(null, true);
         } else {
             callback(new Error('No permitido por CORS'));
