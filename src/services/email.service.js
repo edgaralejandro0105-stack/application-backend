@@ -8,20 +8,21 @@ let transporter;
 async function getTransporter() {
   if (transporter) return transporter;
 
-  const isGmail = process.env.SMTP_HOST && process.env.SMTP_HOST.includes('gmail');
-  const transportConfig = {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_PORT == 465, // true para 465 (SSL), false para 587 (TLS)
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  };
+  const host = process.env.SMTP_HOST ? process.env.SMTP_HOST.trim() : '';
+  const user = process.env.SMTP_USER ? process.env.SMTP_USER.trim() : '';
+  const pass = process.env.SMTP_PASS ? process.env.SMTP_PASS.trim() : '';
+  const portVal = process.env.SMTP_PORT ? process.env.SMTP_PORT.trim() : '465';
 
-  if (isGmail) {
-    transportConfig.service = 'gmail';
-  }
+  const transportConfig = {
+    host,
+    port: parseInt(portVal, 10) || 465,
+    secure: portVal == '465', // true para 465 (SSL), false para 587 (TLS)
+    auth: {
+      user,
+      pass,
+    },
+    family: 4, // Forza el uso de IPv4 para evitar errores ENETUNREACH (red no alcanzable) con IPv6 en Render
+  };
 
   transporter = nodemailer.createTransport(transportConfig);
   return transporter;
@@ -62,6 +63,7 @@ class EmailService {
     try {
       const mailTransporter = await getTransporter();
       
+      const cleanTo = typeof to === 'string' ? to.trim() : to;
       let finalHtml = html;
       if (templateName && context) {
         finalHtml = this.compileTemplate(templateName, context);
@@ -77,7 +79,7 @@ class EmailService {
 
       const mailOptions = {
         from: '"La Casona Eventos" <no-reply@lacasona.com>',
-        to,
+        to: cleanTo,
         subject,
         html: finalHtml,
         attachments: [...defaultAttachments, ...attachments]

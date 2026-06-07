@@ -56,7 +56,7 @@ class CronService {
       const totalSalesAmount = sales.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
 
       // 3. Enviar correo al administrador
-      const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER; // Puedes configurar ADMIN_EMAIL en .env
+      const adminEmail = (process.env.ADMIN_EMAIL || process.env.SMTP_USER || '').trim();
 
       await emailService.sendEmail({
         to: adminEmail,
