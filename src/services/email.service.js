@@ -21,7 +21,13 @@ async function getTransporter() {
       user,
       pass,
     },
-    family: 4, // Forza el uso de IPv4 para evitar errores ENETUNREACH (red no alcanzable) con IPv6 en Render
+    family: 4, // Forza el uso de IPv4
+    lookup: (hostname, options, callback) => {
+      require('dns').lookup(hostname, { family: 4 }, callback);
+    },
+    connectionTimeout: 10000, // 10 segundos max para conectar
+    greetingTimeout: 10000,   // 10 segundos max para el saludo SMTP
+    socketTimeout: 10000,     // 10 segundos max de inactividad
   };
 
   transporter = nodemailer.createTransport(transportConfig);
