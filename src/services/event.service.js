@@ -137,6 +137,7 @@ class EventService {
       start_date: startDate,
       end_date: endDate,
       type_event: data.tipo,
+      guests: data.invitados ? parseInt(data.invitados) : 0,
       status: 'Pending'
     });
 

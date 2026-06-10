@@ -14,6 +14,7 @@ const createWebsiteReservationSchema = z.object({
   horario: z.string({ required_error: "El horario es obligatorio" }),
   fecha: z.string({ required_error: "La fecha es obligatoria" }),
   tipo: z.string({ required_error: "El tipo de evento es obligatorio" }),
+  invitados: z.string().optional(),
   descripcion: z.string().optional(),
   servicios: z.any().optional(),
   personal: z.any().optional(),
