@@ -32,6 +32,25 @@ class AuthService {
       status: 'active'
     });
 
+    try {
+      const emailService = require('./email.service');
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      await emailService.sendEmail({
+        to: email,
+        subject: 'Tus credenciales de acceso - La Casona',
+        templateName: 'welcome-credentials',
+        context: {
+          name,
+          email,
+          password, // send the raw password
+          loginUrl: `${frontendUrl}/login`
+        }
+      });
+    } catch (err) {
+      console.error('Error al enviar correo de credenciales:', err);
+      // No lanzamos error para no interrumpir el flujo de creación de usuario
+    }
+
     const token = this.generateToken(newUser);
     return { user: newUser, token };
   }

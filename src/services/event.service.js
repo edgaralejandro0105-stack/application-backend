@@ -76,27 +76,29 @@ class EventService {
     const nameParts = data.contacto.nombre.trim().split(' ');
     const name = nameParts[0] || 'Desconocido';
     const lastName = nameParts.slice(1).join(' ') || 'N/A';
+    const cedula = data.contacto.cedula ? data.contacto.cedula.trim() : ('WEB-' + Date.now().toString().slice(-6));
     
     let client = await Client.findOne({
-      where: {
-        [Op.or]: [
-          { phone: data.contacto.telefono },
-          data.contacto.correo ? { email: data.contacto.correo.trim().toLowerCase() } : null
-        ].filter(Boolean)
-      }
+      where: { doc_id: cedula }
     });
+
     if (!client) {
       client = await Client.create({
         name: name,
         last_name: lastName,
-        doc_id: 'WEB-' + Date.now().toString().slice(-6),
+        doc_id: cedula,
         phone: data.contacto.telefono,
         email: data.contacto.correo ? data.contacto.correo.trim().toLowerCase() : null
       });
     } else {
-      if (data.contacto.correo && !client.email) {
-        await client.update({ email: data.contacto.correo.trim().toLowerCase() });
-      }
+      // Cliente existe, actualizamos sus datos por si cambiaron de nombre/teléfono/correo
+      const updateData = {};
+      if (name !== 'Desconocido') updateData.name = name;
+      if (lastName !== 'N/A') updateData.last_name = lastName;
+      if (data.contacto.telefono) updateData.phone = data.contacto.telefono;
+      if (data.contacto.correo) updateData.email = data.contacto.correo.trim().toLowerCase();
+      
+      await client.update(updateData);
     }
 
     // 2. Resolve Venue

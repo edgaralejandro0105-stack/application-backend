@@ -3,8 +3,13 @@ const AppError = require('../utils/AppError');
 
 class UserService {
   async getAllUsers() {
+    const { Op } = require('sequelize');
     return await User.findAll({
-      where: { is_active: true },
+      where: { 
+        is_active: {
+          [Op.not]: false
+        }
+      },
       attributes: { exclude: ['password'] },
       include: [{ model: Role, attributes: ['role_name', 'access'] }]
     });

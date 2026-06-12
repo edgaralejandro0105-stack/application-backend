@@ -1,10 +1,48 @@
 const { Op } = require('sequelize');
-const { Sale, SaleDetail, Product } = require('../models');
+const { sequelize, Sale, SaleDetail, Product, Employee } = require('../models');
 const AppError = require('../utils/AppError');
 
 class SaleService {
   async createSale(data) {
-    return await Sale.create(data);
+    const t = await sequelize.transaction();
+    try {
+      if (data.employee_id) {
+        const employee = await Employee.findByPk(data.employee_id);
+        if (!employee) {
+          const firstEmployee = await Employee.findOne();
+          if (firstEmployee) data.employee_id = firstEmployee.employee_id;
+        }
+      } else {
+        const firstEmployee = await Employee.findOne();
+        if (firstEmployee) data.employee_id = firstEmployee.employee_id;
+      }
+
+      const sale = await Sale.create(data, { transaction: t });
+
+      if (data.details && data.details.length > 0) {
+        const details = data.details.map(item => ({
+          sale_id: sale.sale_id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          subtotal: item.subtotal
+        }));
+        await SaleDetail.bulkCreate(details, { transaction: t });
+
+        for (const item of data.details) {
+          const prod = await Product.findByPk(item.product_id);
+          if (prod) {
+            prod.current_stock = Math.max(0, prod.current_stock - item.quantity);
+            await prod.save({ transaction: t });
+          }
+        }
+      }
+
+      await t.commit();
+      return sale;
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
   }
 
   async getAllSales(query) {

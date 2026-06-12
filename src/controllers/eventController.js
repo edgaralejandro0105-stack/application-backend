@@ -23,6 +23,23 @@ exports.createWebsiteReservation = catchAsync(async (req, res) => {
     io.emit('new_reservation', newEvent.toJSON ? newEvent.toJSON() : newEvent);
   }
 
+  // Notificación en Base de Datos
+  const { Notification } = require('../models');
+  try {
+    const newNotification = await Notification.create({
+      user_id: null,
+      title: 'Nueva Reservación Web',
+      message: `Has recibido una nueva pre-reserva de ${req.body.contacto?.nombre || 'Desconocido'} para el ${req.body.fecha ? req.body.fecha.split('-').reverse().join('/') : 'N/A'}.`,
+      type: 'info',
+      read: false
+    });
+    if (io) {
+      io.emit('new_notification', newNotification);
+    }
+  } catch (err) {
+    console.error('Error al guardar notificación en BD:', err);
+  }
+
   // Notificación por Correo (Deshabilitado en backend porque ahora se envía desde el Frontend usando EmailJS debido al bloqueo SMTP de Render)
   /*
   const adminEmail = (process.env.ADMIN_EMAIL || 'admin@lacasona.com').trim();
