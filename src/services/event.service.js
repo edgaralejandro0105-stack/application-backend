@@ -4,7 +4,7 @@ const AppError = require('../utils/AppError');
 
 const EVENT_INCLUDE = [
   { model: Client, attributes: ['name', 'last_name', 'doc_id', 'phone'] },
-  { model: Venue, attributes: ['name'] },
+  { model: Venue, attributes: ['venue_id', 'name'], through: { attributes: [] } },
   { 
     model: EventStaff, 
     include: [{ model: Employee, attributes: ['first_name', 'last_name', 'rol'] }] 
@@ -34,23 +34,43 @@ class EventService {
   }
 
   async createEvent(data) {
-    const { EventItem, EventStaff } = require('../models');
+    const { EventItem, EventStaff, EventVenue } = require('../models');
 
-    // Anti-collision check
-    const conflict = await Event.findOne({
-      where: {
-        venue_id: data.venue_id,
-        status: { [Op.ne]: 'Cancelled' },
-        start_date: { [Op.lt]: data.end_date },
-        end_date: { [Op.gt]: data.start_date }
-      }
-    });
-
-    if (conflict) {
-      throw new AppError('El salón seleccionado ya se encuentra ocupado en ese horario.', 409);
+    let venueIds = [];
+    if (data.venue_ids && Array.isArray(data.venue_ids)) {
+      venueIds = data.venue_ids;
+    } else if (data.venue_id) {
+      venueIds = [data.venue_id];
     }
 
+    // Anti-collision check
+    if (venueIds.length > 0) {
+      const conflict = await Event.findOne({
+        where: {
+          status: { [Op.ne]: 'Cancelled' },
+          start_date: { [Op.lt]: data.end_date },
+          end_date: { [Op.gt]: data.start_date }
+        },
+        include: [{
+          model: Venue,
+          where: { venue_id: { [Op.in]: venueIds } },
+          attributes: ['venue_id']
+        }]
+      });
+
+      if (conflict) {
+        throw new AppError('Uno o más salones seleccionados ya se encuentran ocupados en ese horario.', 409);
+      }
+    }
+
+    if (venueIds.length > 0) data.venue_id = venueIds[0];
+
     const newEvent = await Event.create(data);
+
+    if (venueIds.length > 0) {
+      const venues = venueIds.map(vId => ({ event_id: newEvent.event_id, venue_id: vId }));
+      await EventVenue.bulkCreate(venues);
+    }
 
     if (data.services && Array.isArray(data.services) && data.services.length > 0) {
       const items = data.services.map(serviceId => ({
@@ -143,6 +163,11 @@ class EventService {
       status: 'Pending'
     });
 
+    if (venueId) {
+      const { EventVenue } = require('../models');
+      await EventVenue.create({ event_id: newEvent.event_id, venue_id: venueId });
+    }
+
     // Optionally attach extra fields for the notification
     newEvent.dataValues.event_date = data.fecha;
     newEvent.dataValues.id = newEvent.event_id;
@@ -157,32 +182,53 @@ class EventService {
   }
 
   async updateEvent(id, data) {
-    const { EventItem, EventStaff } = require('../models');
-    const event = await Event.findByPk(id);
+    const { EventItem, EventStaff, EventVenue } = require('../models');
+    const event = await Event.findByPk(id, { include: [{ model: Venue, attributes: ['venue_id'] }] });
     if (!event) throw new AppError('Evento no encontrado', 404);
     
-    // Si se están actualizando fechas o salón, hacer anti-collision check
-    if (data.start_date || data.end_date || data.venue_id) {
-      const targetVenueId = data.venue_id || event.venue_id;
-      const targetStartDate = data.start_date || event.start_date;
-      const targetEndDate = data.end_date || event.end_date;
+    let targetVenueIds = event.Venues ? event.Venues.map(v => v.venue_id) : [];
+    if (data.venue_ids && Array.isArray(data.venue_ids)) {
+      targetVenueIds = data.venue_ids;
+    } else if (data.venue_id) {
+      targetVenueIds = [data.venue_id];
+    }
 
+    const targetStartDate = data.start_date || event.start_date;
+    const targetEndDate = data.end_date || event.end_date;
+
+    if ((data.start_date || data.end_date || data.venue_ids || data.venue_id) && targetVenueIds.length > 0) {
       const conflict = await Event.findOne({
         where: {
           event_id: { [Op.ne]: id },
-          venue_id: targetVenueId,
           status: { [Op.ne]: 'Cancelled' },
           start_date: { [Op.lt]: targetEndDate },
           end_date: { [Op.gt]: targetStartDate }
-        }
+        },
+        include: [{
+          model: Venue,
+          where: { venue_id: { [Op.in]: targetVenueIds } },
+          attributes: ['venue_id']
+        }]
       });
 
       if (conflict) {
-        throw new AppError('El salón seleccionado ya se encuentra ocupado en ese horario.', 409);
+        throw new AppError('Uno o más salones seleccionados ya se encuentran ocupados en ese horario.', 409);
       }
     }
 
+    if (targetVenueIds.length > 0 && data.venue_ids) {
+      data.venue_id = targetVenueIds[0];
+    }
+
     await event.update(data);
+
+    if (data.venue_ids !== undefined) {
+      await EventVenue.destroy({ where: { event_id: id } });
+      if (targetVenueIds.length > 0) {
+        const venues = targetVenueIds.map(vId => ({ event_id: id, venue_id: vId }));
+        await EventVenue.bulkCreate(venues);
+      }
+    }
     
     if (data.services !== undefined) {
       await EventItem.destroy({ where: { event_id: id } });
@@ -224,7 +270,7 @@ class EventService {
     }
     const events = await Event.findAll({
       where: { client_id: client.client_id },
-      include: [{ model: Venue, attributes: ['name'] }],
+      include: [{ model: Venue, attributes: ['name'], through: { attributes: [] } }],
       order: [['start_date', 'DESC']]
     });
     return {
@@ -238,7 +284,7 @@ class EventService {
         end_date: e.end_date,
         type_event: e.type_event,
         status: e.status,
-        venue: e.Venue ? e.Venue.name : 'N/A'
+        venue: e.Venues && e.Venues.length > 0 ? e.Venues.map(v => v.name).join(', ') : 'N/A'
       }))
     };
   }

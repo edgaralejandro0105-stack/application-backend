@@ -18,6 +18,7 @@ const Venue = require('./Venue.model');
 const Provider = require('./Provider.model');
 const Catalog = require('./Catalog.model');
 const Notification = require('./Notification.model');
+const EventVenue = require('./EventVenue.model');
 
 // Definir Asociaciones
 
@@ -40,8 +41,8 @@ Catalog.belongsTo(Product, { foreignKey: 'product_id' });
 Client.hasMany(Event, { foreignKey: 'client_id' });
 Event.belongsTo(Client, { foreignKey: 'client_id' });
 
-Venue.hasMany(Event, { foreignKey: 'venue_id' });
-Event.belongsTo(Venue, { foreignKey: 'venue_id' });
+Venue.belongsToMany(Event, { through: EventVenue, foreignKey: 'venue_id' });
+Event.belongsToMany(Venue, { through: EventVenue, foreignKey: 'event_id' });
 
 // Event - EventItems
 Event.hasMany(EventItem, { foreignKey: 'event_id' });
@@ -87,5 +88,6 @@ module.exports = {
   Venue,
   Provider,
   Catalog,
-  Notification
+  Notification,
+  EventVenue
 };

@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const { Product } = require('../models');
 const AppError = require('../utils/AppError');
 
@@ -23,12 +23,46 @@ class ProductService {
     if (query.category) {
       where.category = query.category;
     }
+    
+    if (query.stockStatus) {
+      if (query.stockStatus === 'Out') {
+        where.current_stock = { [Op.lte]: 0 };
+      } else if (query.stockStatus === 'Low') {
+        where.current_stock = { [Op.lt]: Sequelize.col('min_stock'), [Op.gt]: 0 };
+      } else if (query.stockStatus === 'Normal') {
+        where.current_stock = { [Op.gte]: Sequelize.col('min_stock') };
+      }
+    }
+
+    if (query.expiryStatus) {
+      const now = new Date();
+      const in30Days = new Date();
+      in30Days.setDate(now.getDate() + 30);
+      
+      if (query.expiryStatus === 'Expired') {
+        where.expiry_date = { [Op.lt]: now };
+      } else if (query.expiryStatus === 'Expiring') {
+        where.expiry_date = { [Op.gte]: now, [Op.lte]: in30Days };
+      } else if (query.expiryStatus === 'Good') {
+        where.expiry_date = { [Op.gt]: in30Days };
+      }
+    }
+
+    let order = [['create_at', 'DESC']];
+    if (query.sortBy) {
+      if (query.sortBy === 'nameAsc') order = [['name', 'ASC']];
+      if (query.sortBy === 'nameDesc') order = [['name', 'DESC']];
+      if (query.sortBy === 'stockDesc') order = [['current_stock', 'DESC']];
+      if (query.sortBy === 'stockAsc') order = [['current_stock', 'ASC']];
+      if (query.sortBy === 'priceDesc') order = [['unit_price', 'DESC']];
+      if (query.sortBy === 'priceAsc') order = [['unit_price', 'ASC']];
+    }
 
     const options = {
       where,
       limit,
       offset,
-      order: [['create_at', 'DESC']]
+      order
     };
     if (query.includeDeleted === 'true') {
       options.paranoid = false;

@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { InventoryBar } = require('../models');
+const { InventoryBar, Product, User } = require('../models');
 const AppError = require('../utils/AppError');
 
 class InventoryService {
@@ -34,9 +34,45 @@ class InventoryService {
     const offset = (page - 1) * limit;
 
     const where = {};
-    if (query.movement_type) where.movement_type = query.movement_type;
+    if (query.movement_type && query.movement_type !== 'All') {
+      where.movement_type = query.movement_type;
+    }
+    
+    if (query.startDate && query.endDate) {
+      const start = new Date(query.startDate);
+      const end = new Date(query.endDate);
+      end.setHours(23, 59, 59, 999);
+      where.date = { [Op.between]: [start, end] };
+    } else if (query.startDate) {
+      where.date = { [Op.gte]: new Date(query.startDate) };
+    } else if (query.endDate) {
+      const end = new Date(query.endDate);
+      end.setHours(23, 59, 59, 999);
+      where.date = { [Op.lte]: end };
+    }
 
-    const result = await InventoryBar.findAndCountAll({ where, limit, offset, order: [['date', 'DESC']] });
+    const include = [
+      {
+        model: Product,
+        attributes: ['name']
+      },
+      {
+        model: User,
+        attributes: ['name']
+      }
+    ];
+
+    if (query.search) {
+      where['$Product.name$'] = { [Op.iLike]: `%${query.search}%` };
+    }
+
+    const result = await InventoryBar.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [['date', 'DESC']],
+      include
+    });
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 

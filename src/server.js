@@ -191,6 +191,16 @@ async function startServer() {
         await sequelize.sync();
         console.log('✅ Base de datos sincronizada exitosamente');
 
+        // 10. Migración de venue_id a EventVenues (Muchos a Muchos)
+        await sequelize.query(`
+            INSERT INTO event_venues (event_id, venue_id)
+            SELECT event_id, venue_id FROM events
+            WHERE venue_id IS NOT NULL AND NOT EXISTS (
+                SELECT 1 FROM event_venues ev WHERE ev.event_id = events.event_id AND ev.venue_id = events.venue_id
+            );
+        `).catch((err) => { console.error('Error migrando venues:', err); });
+
+
         // [MODIFICACIÓN PARA TESTS]: Verificamos si este archivo se ejecuta directamente con Node o si es importado.
         // Si es importado por Jest/Supertest, NO iniciamos el servidor en el puerto para evitar el error "EADDRINUSE".
         if (require.main === module) {

@@ -15,6 +15,7 @@ const Event = db.define('Event', {
   },
   venue_id: {
     type: DataTypes.INTEGER,
+    allowNull: true,
     references: { model: Venue, key: 'venue_id' }
   },
   start_date: {
@@ -60,6 +61,5 @@ const Event = db.define('Event', {
 
 // Relaciones
 Event.belongsTo(Client, { foreignKey: 'client_id' });
-Event.belongsTo(Venue, { foreignKey: 'venue_id' });
 
 module.exports = Event;
