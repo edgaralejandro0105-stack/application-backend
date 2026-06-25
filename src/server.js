@@ -57,9 +57,15 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.startsWith('http://192.168.')) {
+        if (!origin || 
+            allowedOrigins.includes(origin) || 
+            origin.startsWith('http://localhost:') || 
+            origin.startsWith('http://127.0.0.1:') || 
+            origin.startsWith('http://192.168.') ||
+            (origin && origin.includes('frontend-casona.netlify.app'))) {
             callback(null, true);
         } else {
+            console.error('CORS Error: Origin not allowed:', origin);
             callback(new Error('No permitido por CORS'));
         }
     },
