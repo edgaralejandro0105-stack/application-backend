@@ -11,6 +11,12 @@ const Provider = db.define('Provider', {
     type: DataTypes.STRING(100),
     allowNull: false
   },
+  category: {
+    type: DataTypes.STRING(100)
+  },
+  rif: {
+    type: DataTypes.STRING(20)
+  },
   contact_name: {
     type: DataTypes.STRING(100)
   },
@@ -19,7 +25,13 @@ const Provider = db.define('Provider', {
   },
   email: {
     type: DataTypes.STRING,
-    validate: { isEmail: true }
+    validate: {
+      isValidEmail(value) {
+        if (value && value.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          throw new Error('Debe ser un correo válido');
+        }
+      }
+    }
   },
   address: {
     type: DataTypes.STRING
@@ -30,7 +42,9 @@ const Provider = db.define('Provider', {
   }
 }, {
   tableName: 'providers',
-  timestamps: false
+  timestamps: true,
+  createdAt: 'create_at',
+  updatedAt: 'update_at'
 });
 
 module.exports = Provider;

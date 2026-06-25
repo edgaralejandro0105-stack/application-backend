@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { User, Role } = require('../models');
 const AppError = require('../utils/AppError');
 
@@ -30,14 +31,30 @@ class UserService {
 
     const updateData = { ...data };
     
-    // Si se envía una contraseña, encriptarla
     if (updateData.password) {
-      const crypto = require('crypto');
-      updateData.password = crypto.createHash('sha256').update(updateData.password).digest('hex');
+      updateData.password = this.hashPassword(updateData.password);
     }
 
     await user.update(updateData);
     return user;
+  }
+
+  async updatePassword(id, data) {
+    const { currentPassword, newPassword } = data;
+    const user = await User.findByPk(id);
+    if (!user) throw new AppError('Usuario no encontrado', 404);
+
+    if (user.password !== this.hashPassword(currentPassword)) {
+      throw new AppError('La contraseña actual no es correcta', 400);
+    }
+
+    user.password = this.hashPassword(newPassword);
+    await user.save();
+    return true;
+  }
+
+  hashPassword(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
   }
 
   async deleteUser(id) {

@@ -31,7 +31,13 @@ const Employee = db.define('Employee', {
   email: {
     type: DataTypes.STRING(80),
     unique: true,
-    validate: { isEmail: true }
+    validate: {
+      isValidEmail(value) {
+        if (value && value.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          throw new Error('Debe ser un correo válido');
+        }
+      }
+    }
   },
 
   rol: {

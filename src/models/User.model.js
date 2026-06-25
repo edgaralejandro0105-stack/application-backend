@@ -41,6 +41,10 @@ const User = db.define('User', {
     type: DataTypes.DATE,
     allowNull: true
   },
+  phone: {
+    type: DataTypes.STRING(20),
+    allowNull: true
+  },
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true

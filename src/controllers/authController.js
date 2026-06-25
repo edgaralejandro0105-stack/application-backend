@@ -35,7 +35,7 @@ exports.login = catchAsync(async (req, res) => {
 });
 
 exports.refreshToken = catchAsync(async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1] || req.body.token;
+  const token = req.headers.authorization?.split(' ')[1] || req.body.token || req.body.refreshToken;
   const newToken = await authService.refreshToken(token);
   
   res.status(200).json({ message: 'Token renovado', token: newToken });

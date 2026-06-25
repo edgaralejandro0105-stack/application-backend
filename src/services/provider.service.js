@@ -13,7 +13,7 @@ class ProviderService {
     if (search) {
       where[Op.or] = [
         { name: { [Op.iLike]: `%${search}%` } },
-        { contact_name: { [Op.iLike]: `%${search}%` } },
+        { rif: { [Op.iLike]: `%${search}%` } },
         { email: { [Op.iLike]: `%${search}%` } }
       ];
     }

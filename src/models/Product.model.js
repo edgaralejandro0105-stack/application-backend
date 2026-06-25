@@ -41,8 +41,8 @@ const Product = db.define('Product', {
 }, {
   tableName: 'products',
   timestamps: true,
-  createdAt: false,
-  updatedAt: false,
+  createdAt: 'create_at',
+  updatedAt: 'update_at',
   paranoid: true,
   deletedAt: 'deleted_at'
 });

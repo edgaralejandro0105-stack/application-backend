@@ -191,6 +191,30 @@ async function startServer() {
         // Planner Pricing
         await sequelize.query(`ALTER TABLE venues ADD COLUMN IF NOT EXISTS base_price DECIMAL(10, 2) DEFAULT 0.00;`).catch(() => { });
         await sequelize.query(`ALTER TABLE employees ADD COLUMN IF NOT EXISTS salary_per_event DECIMAL(10, 2) DEFAULT 0.00;`).catch(() => { });
+        await sequelize.query(`ALTER TABLE providers ADD COLUMN IF NOT EXISTS category VARCHAR(100);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE providers ADD COLUMN IF NOT EXISTS rif VARCHAR(20);`).catch(() => { });
+        await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20);`).catch(() => { });
+
+        // ─── Consolidar roles duplicados ─────────────────────────────────────
+        // Unificar "admin" y "Administrador" bajo un solo nombre
+        await sequelize.query(`
+          UPDATE users SET role_id = (
+            SELECT id FROM rol WHERE LOWER(TRIM(role_name)) = 'administrador' LIMIT 1
+          ) WHERE role_id IN (
+            SELECT id FROM rol WHERE LOWER(TRIM(role_name)) = 'admin'
+          );
+        `).catch(() => { });
+        await sequelize.query(`
+          DELETE FROM rol WHERE LOWER(TRIM(role_name)) = 'admin'
+          AND id NOT IN (SELECT MIN(id) FROM rol WHERE LOWER(TRIM(role_name)) = 'admin');
+        `).catch(() => { });
+
+        // ─── Limpiar roles duplicados ──────────────────────────────────────────
+        await sequelize.query(`
+            DELETE FROM rol WHERE id NOT IN (
+                SELECT MIN(id) FROM rol GROUP BY LOWER(TRIM(role_name))
+            );
+        `).catch(() => { });
 
         // ─── Sincronización normal ─────────────────────────────────────────────
         // sync() crea tablas que falten pero NO altera las existentes.

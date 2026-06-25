@@ -13,7 +13,12 @@ exports.getUserById = catchAsync(async (req, res) => {
 
 exports.updateUser = catchAsync(async (req, res) => {
   const user = await userService.updateUser(req.params.id, req.body);
-  res.status(200).json({ message: 'Usuario actualizado correctamente', data: user });
+  res.status(200).json(user);
+});
+
+exports.updatePassword = catchAsync(async (req, res) => {
+  await userService.updatePassword(req.params.id, req.body);
+  res.status(200).json({ message: 'Contraseña actualizada correctamente' });
 });
 
 exports.deleteUser = catchAsync(async (req, res) => {
