@@ -51,7 +51,8 @@ const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://lacasonadisco.netlify.app'
+    'https://lacasonadisco.netlify.app',
+    'https://frontend-casona.netlify.app'
 ].filter(Boolean);
 
 const corsOptions = {
