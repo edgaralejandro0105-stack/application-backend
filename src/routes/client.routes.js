@@ -3,6 +3,10 @@ const router = express.Router();
 const clientController = require('../controllers/clientController');
 const validateSchema = require('../middleware/validateSchema');
 const { createClientSchema } = require('../schemas/client.schema');
+const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
+
+router.use(verifyToken);
+router.use(requireRoles('Gerente', 'Ventas'));
 
 // URL base: /api/clients
 router.post('/', validateSchema(createClientSchema), clientController.createClient);

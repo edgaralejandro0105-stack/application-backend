@@ -4,7 +4,7 @@ const reportService = require('../services/report.service');
 const catchAsync = require('../utils/catchAsync');
 
 exports.getAllEvents = catchAsync(async (req, res) => {
-  const result = await eventService.getAllEvents(req.query);
+  const result = await eventService.getAllEvents(req.query, req.user);
   res.status(200).json(result);
 });
 

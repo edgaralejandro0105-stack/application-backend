@@ -26,6 +26,10 @@ const EventVenue = require('./EventVenue.model');
 Role.hasMany(User, { foreignKey: 'role_id' });
 User.belongsTo(Role, { foreignKey: 'role_id' });
 
+// User - Employee
+User.hasOne(Employee, { foreignKey: 'user_id' });
+Employee.belongsTo(User, { foreignKey: 'user_id' });
+
 // User - Notification
 User.hasMany(Notification, { foreignKey: 'user_id' });
 Notification.belongsTo(User, { foreignKey: 'user_id' });

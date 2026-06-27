@@ -9,6 +9,7 @@ const { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema }
 router.post('/register', validateSchema(registerSchema), authController.register); // Zod valida antes de registrar
 router.post('/login', validateSchema(loginSchema), authController.login); // Zod valida antes del login
 router.post('/refresh-token', authController.refreshToken);
+router.post('/logout', authController.logout);
 
 // Nuevas rutas para la evaluación
 router.get('/profile', verifyToken, authController.getProfile);

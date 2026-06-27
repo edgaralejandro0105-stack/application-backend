@@ -16,6 +16,14 @@ class AuthService {
     );
   }
 
+  generateRefreshToken(user) {
+    return jwt.sign(
+      { id: user.user_id },
+      process.env.JWT_REFRESH_SECRET || 'refresh_secret',
+      { expiresIn: '7d' }
+    );
+  }
+
   async register(data) {
     const { name, email, password, role_id } = data;
     
@@ -52,7 +60,8 @@ class AuthService {
     }
 
     const token = this.generateToken(newUser);
-    return { user: newUser, token };
+    const refreshToken = this.generateRefreshToken(newUser);
+    return { user: newUser, token, refreshToken };
   }
 
   async login(email, password) {
@@ -75,7 +84,8 @@ class AuthService {
     }
 
     const token = this.generateToken(user);
-    return { user, token };
+    const refreshToken = this.generateRefreshToken(user);
+    return { user, token, refreshToken };
   }
 
   async refreshToken(token) {
@@ -84,7 +94,7 @@ class AuthService {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+      const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET || 'refresh_secret');
       const user = await User.findByPk(decoded.id);
       
       if (!user) {
@@ -92,15 +102,21 @@ class AuthService {
       }
 
       const newToken = this.generateToken(user);
-      return newToken;
+      const newRefreshToken = this.generateRefreshToken(user);
+      return { token: newToken, refreshToken: newRefreshToken };
     } catch (error) {
-      throw new AppError('Token inválido o expirado', 401);
+      throw new AppError('Refresh token inválido o expirado', 401);
     }
   }
 
   async getProfile(userId) {
+    const { Employee, Role } = require('../models');
     const user = await User.findByPk(userId, {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: Role, attributes: ['role_name', 'access'] },
+        { model: Employee, attributes: ['salary_per_event', 'phone', 'first_name', 'last_name'] }
+      ]
     });
     
     if (!user) {

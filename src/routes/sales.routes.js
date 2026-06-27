@@ -3,6 +3,11 @@ const router = express.Router();
 const saleController = require('../controllers/saleController');
 const validateSchema = require('../middleware/validateSchema');
 const { createSaleSchema } = require('../schemas/sale.schema');
+const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
+
+// Protegemos las rutas de ventas
+router.use(verifyToken);
+router.use(requireRoles('Gerente', 'Ventas'));
 
 // URL base: /api/sales
 router.post('/', validateSchema(createSaleSchema), saleController.createSale);

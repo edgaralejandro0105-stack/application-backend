@@ -9,7 +9,7 @@ require('dotenv').config();
 const { sequelize } = require('./models');
 
 
-//  RUTAS
+//  RUTAS (Trigger nodemon)
 const authRoutes = require('./routes/auth.routes');
 const clientRoutes = require('./routes/client.routes');
 const employeesRoutes = require('./routes/employees.routes');

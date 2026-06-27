@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const providerController = require('../controllers/providerController');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
 
 router.use(verifyToken);
+router.use(requireRoles('Gerente'));
 
 router.get('/', providerController.getProviders);
 router.get('/:id', providerController.getProviderById);

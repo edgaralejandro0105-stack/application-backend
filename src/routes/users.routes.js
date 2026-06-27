@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
 
 // Protegemos TODAS las rutas de usuarios exigiendo que tengan un token válido
+// Al no pasar argumentos a requireRoles(), por defecto requiere nivel 3 (Administrador)
 router.use(verifyToken);
+router.use(requireRoles());
 
 // URL base esperada: /api/users
 router.get('/', userController.getAllUsers);

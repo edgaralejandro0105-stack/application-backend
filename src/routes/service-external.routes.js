@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const serviceExternalController = require('../controllers/serviceExternalController');
 const upload = require('../middleware/uploadMiddleware');
+const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
+
+router.use(verifyToken);
+router.use(requireRoles('Gerente', 'Ventas'));
 
 // URL base: /api/service-external
 router.post('/', upload.single('image'), serviceExternalController.createServiceExternal);

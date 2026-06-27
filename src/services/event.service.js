@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { Event, Client, Venue, EventItem, EventStaff, ServiceExternal, Employee } = require('../models');
+const sequelize = require('../config/db');
 const AppError = require('../utils/AppError');
 
 const EVENT_INCLUDE = [
@@ -16,7 +17,7 @@ const EVENT_INCLUDE = [
 ];
 
 class EventService {
-  async getAllEvents(query) {
+  async getAllEvents(query, user) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const offset = (page - 1) * limit;
@@ -24,6 +25,24 @@ class EventService {
     const where = {};
     if (query.status) where.status = query.status;
     if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
+
+    if (user && user.Role && user.Role.role_name === 'Staff') {
+      const employee = await Employee.findOne({ 
+        where: { 
+          [Op.or]: [
+            { user_id: user.user_id },
+            { email: user.email }
+          ]
+        } 
+      });
+      if (employee) {
+        where.event_id = {
+          [Op.in]: sequelize.literal(`(SELECT event_id FROM event_staff WHERE employee_id = ${employee.employee_id})`)
+        };
+      } else {
+        where.event_id = null; // No employee record found, return no events
+      }
+    }
 
     const result = await Event.findAndCountAll({
       where, limit, offset,

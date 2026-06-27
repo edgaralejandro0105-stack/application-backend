@@ -3,6 +3,10 @@ const router = express.Router();
 const employeeController = require('../controllers/employeeController');
 const validateSchema = require('../middleware/validateSchema');
 const { createEmployeeSchema } = require('../schemas/employee.schema');
+const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
+
+router.use(verifyToken);
+router.use(requireRoles('Gerente'));
 
 // URL base: /api/employees
 router.post('/', validateSchema(createEmployeeSchema), employeeController.createEmployee);
