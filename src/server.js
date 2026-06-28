@@ -52,7 +52,8 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     'https://lacasonadisco.netlify.app',
-    'https://frontend-casona.netlify.app'
+    'https://frontend-casona.netlify.app',
+    'https://frontendcasona.netlify.app'
 ].filter(Boolean);
 
 const corsOptions = {
@@ -62,7 +63,7 @@ const corsOptions = {
             origin.startsWith('http://localhost:') || 
             origin.startsWith('http://127.0.0.1:') || 
             origin.startsWith('http://192.168.') ||
-            (origin && origin.includes('frontend-casona.netlify.app'))) {
+            (origin && (origin.includes('frontend-casona.netlify.app') || origin.includes('frontendcasona.netlify.app')))) {
             callback(null, true);
         } else {
             console.error('CORS Error: Origin not allowed:', origin);
