@@ -5,13 +5,16 @@ const validateSchema = require('../middleware/validateSchema');
 const { createEmployeeSchema } = require('../schemas/employee.schema');
 const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
 
+// Rutas públicas (para la web)
+router.get('/', employeeController.getAllEmployees);
+router.get('/:id', employeeController.getEmployeeById);
+
+// A partir de aquí, protegemos las rutas internas
 router.use(verifyToken);
 router.use(requireRoles('Gerente'));
 
 // URL base: /api/employees
 router.post('/', validateSchema(createEmployeeSchema), employeeController.createEmployee);
-router.get('/', employeeController.getAllEmployees);
-router.get('/:id', employeeController.getEmployeeById);
 router.put('/:id', employeeController.updateEmployee);
 router.delete('/:id', employeeController.deleteEmployee);
 
