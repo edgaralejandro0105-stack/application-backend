@@ -17,5 +17,6 @@ router.use(requireRoles('Gerente', 'Ventas'));
 router.post('/', upload.single('image'), serviceExternalController.createServiceExternal);
 router.put('/:id', upload.single('image'), serviceExternalController.updateServiceExternal);
 router.delete('/:id', serviceExternalController.deleteServiceExternal);
+router.put('/:id/restore', serviceExternalController.restoreServiceExternal);
 
 module.exports = router;

@@ -17,6 +17,12 @@ class ProviderService {
         { email: { [Op.iLike]: `%${search}%` } }
       ];
     }
+    
+    if (query.deleted === 'true') {
+      where.is_active = false;
+    } else {
+      where.is_active = { [Op.not]: false };
+    }
 
     const result = await Provider.findAndCountAll({
       where,
@@ -47,7 +53,13 @@ class ProviderService {
 
   async delete(id) {
     const provider = await this.getById(id);
-    await provider.update({ status: 'inactive' });
+    await provider.update({ is_active: false, deleted_at: new Date() });
+    return provider;
+  }
+
+  async restore(id) {
+    const provider = await this.getById(id);
+    await provider.update({ is_active: true, deleted_at: null });
     return provider;
   }
 }

@@ -18,5 +18,6 @@ router.use(requireRoles('Gerente', 'Ventas'));
 router.post('/', upload.single('image'), validateSchema(createVenueSchema), venueController.createVenue);
 router.put('/:id', upload.single('image'), venueController.updateVenue);
 router.delete('/:id', venueController.deleteVenue);
+router.put('/:id/restore', venueController.restoreVenue);
 
 module.exports = router;

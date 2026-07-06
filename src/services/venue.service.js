@@ -8,11 +8,16 @@ class VenueService {
     const limit = parseInt(query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
-    const where = { is_active: true };
+    const where = {};
+    if (query.deleted === 'true') {
+      where.is_active = false;
+    } else {
+      where.is_active = true;
+    }
+    
     if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
 
     const options = { where, limit, offset, order: [['name', 'ASC']] };
-    if (query.includeDeleted === 'true') options.paranoid = false;
 
     const result = await Venue.findAndCountAll(options);
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
@@ -38,7 +43,14 @@ class VenueService {
   async deleteVenue(id) {
     const venue = await Venue.findByPk(id);
     if (!venue) throw new AppError('Salón no encontrado', 404);
-    await venue.update({ is_active: false });
+    await venue.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreVenue(id) {
+    const venue = await Venue.findByPk(id);
+    if (!venue) throw new AppError('Salón no encontrado', 404);
+    await venue.update({ is_active: true, deleted_at: null });
     return true;
   }
 }

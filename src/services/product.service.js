@@ -23,6 +23,11 @@ class ProductService {
     if (query.category) {
       where.category = query.category;
     }
+    if (query.deleted === 'true') {
+      where.is_active = false;
+    } else {
+      where.is_active = { [Op.not]: false };
+    }
     
     if (query.stockStatus) {
       if (query.stockStatus === 'Out') {
@@ -64,9 +69,6 @@ class ProductService {
       offset,
       order
     };
-    if (query.includeDeleted === 'true') {
-      options.paranoid = false;
-    }
 
     const products = await Product.findAndCountAll(options);
 
@@ -103,7 +105,17 @@ class ProductService {
       throw new AppError('Producto no encontrado', 404);
     }
     
-    await product.destroy();
+    await product.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreProduct(id) {
+    const product = await Product.findByPk(id);
+    if (!product) {
+      throw new AppError('Producto no encontrado', 404);
+    }
+    
+    await product.update({ is_active: true, deleted_at: null });
     return true;
   }
 }

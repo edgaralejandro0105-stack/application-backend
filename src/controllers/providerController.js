@@ -45,7 +45,16 @@ const updateProvider = async (req, res, next) => {
 const deleteProvider = async (req, res, next) => {
   try {
     await providerService.delete(req.params.id);
-    res.json({ message: 'Proveedor marcado como inactivo' });
+    res.json({ message: 'Proveedor movido a la papelera' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const restoreProvider = async (req, res, next) => {
+  try {
+    await providerService.restore(req.params.id);
+    res.json({ message: 'Proveedor restaurado correctamente' });
   } catch (error) {
     next(error);
   }
@@ -56,5 +65,6 @@ module.exports = {
   getProviderById,
   createProvider,
   updateProvider,
-  deleteProvider
+  deleteProvider,
+  restoreProvider
 };

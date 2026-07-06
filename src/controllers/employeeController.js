@@ -23,5 +23,10 @@ exports.updateEmployee = catchAsync(async (req, res) => {
 
 exports.deleteEmployee = catchAsync(async (req, res) => {
   await employeeService.deleteEmployee(req.params.id);
-  res.status(200).json({ message: 'Empleado eliminado' });
+  res.status(200).json({ message: 'Empleado movido a la papelera' });
+});
+
+exports.restoreEmployee = catchAsync(async (req, res) => {
+  await employeeService.restoreEmployee(req.params.id);
+  res.status(200).json({ message: 'Empleado restaurado correctamente' });
 });

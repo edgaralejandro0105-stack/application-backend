@@ -37,6 +37,10 @@ const Product = db.define('Product', {
   image_url: {
     type: DataTypes.STRING(255),
     allowNull: true
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   }
 }, {
   tableName: 'products',

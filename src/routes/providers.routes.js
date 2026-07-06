@@ -11,5 +11,6 @@ router.get('/:id', providerController.getProviderById);
 router.post('/', providerController.createProvider);
 router.put('/:id', providerController.updateProvider);
 router.delete('/:id', providerController.deleteProvider);
+router.put('/:id/restore', providerController.restoreProvider);
 
 module.exports = router;

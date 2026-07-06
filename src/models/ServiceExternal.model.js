@@ -33,6 +33,10 @@ const ServiceExternal = db.define('ServiceExternal', {
   image_url: {
     type: DataTypes.STRING(255),
     allowNull: true
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'services_external',

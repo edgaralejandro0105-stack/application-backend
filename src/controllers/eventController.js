@@ -127,7 +127,12 @@ exports.updateEvent = catchAsync(async (req, res) => {
 
 exports.deleteEvent = catchAsync(async (req, res) => {
   await eventService.deleteEvent(req.params.id);
-  res.status(200).json({ message: 'Evento eliminado de la base de datos' });
+  res.status(200).json({ message: 'Evento movido a la papelera' });
+});
+
+exports.restoreEvent = catchAsync(async (req, res) => {
+  await eventService.restoreEvent(req.params.id);
+  res.status(200).json({ message: 'Evento restaurado correctamente' });
 });
 
 exports.getWebsiteReservationStatus = catchAsync(async (req, res) => {

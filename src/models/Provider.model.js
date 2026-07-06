@@ -39,12 +39,22 @@ const Provider = db.define('Provider', {
   status: {
     type: DataTypes.ENUM('active', 'inactive'),
     defaultValue: 'active'
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'providers',
   timestamps: true,
   createdAt: 'create_at',
-  updatedAt: 'update_at'
+  updatedAt: 'update_at',
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 module.exports = Provider;

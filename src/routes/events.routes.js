@@ -24,5 +24,6 @@ router.get('/:id', requireRoles('Gerente', 'Ventas', 'Staff'), eventController.g
 router.put('/:id', requireRoles('Gerente', 'Ventas'), eventController.updateEvent);     // PUT: Actualiza/Modifica un evento existente por ID
 router.patch('/:id', requireRoles('Gerente', 'Ventas'), eventController.updateEvent);   // PATCH: Actualización parcial
 router.delete('/:id', requireRoles('Gerente', 'Ventas'), eventController.deleteEvent);  // DELETE: Elimina el evento que coincida con el ID
+router.put('/:id/restore', requireRoles('Gerente', 'Ventas'), eventController.restoreEvent);
 
 module.exports = router;

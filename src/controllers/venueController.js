@@ -29,5 +29,10 @@ exports.updateVenue = catchAsync(async (req, res) => {
 
 exports.deleteVenue = catchAsync(async (req, res) => {
   await venueService.deleteVenue(req.params.id);
-  res.status(200).json({ message: 'Salón eliminado correctamente' });
+  res.status(200).json({ message: 'Salón enviado a la papelera' });
+});
+
+exports.restoreVenue = catchAsync(async (req, res) => {
+  await venueService.restoreVenue(req.params.id);
+  res.status(200).json({ message: 'Salón restaurado' });
 });

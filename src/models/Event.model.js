@@ -53,6 +53,14 @@ const Event = db.define('Event', {
   status: {
     type: DataTypes.ENUM('Confirmed', 'Pending', 'On Hold', 'Cancelled', 'Lead', 'Finished'),
     defaultValue: 'Pending'
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'events',

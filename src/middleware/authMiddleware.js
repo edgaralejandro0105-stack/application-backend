@@ -63,7 +63,43 @@ const requireRoles = (...roles) => {
   };
 };
 
+const { Client } = require('../models');
+
+const verifyClientToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return next(new AppError('Token no proporcionado. Por favor inicie sesión.', 401));
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key_casona');
+
+    if (!decoded || !decoded.client_id) {
+      return next(new AppError('Token de cliente inválido.', 401));
+    }
+
+    const client = await Client.findByPk(decoded.client_id);
+
+    if (!client) {
+      return next(new AppError('El cliente asociado a este token ya no existe.', 401));
+    }
+
+    req.user = { client_id: client.client_id, email: client.email, role: 'Client' };
+    next();
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return next(new AppError('Token inválido. Inicie sesión nuevamente.', 401));
+    }
+    if (error.name === 'TokenExpiredError') {
+      return next(new AppError('Su token ha expirado. Inicie sesión nuevamente.', 401));
+    }
+    next(error);
+  }
+};
+
 module.exports = {
   verifyToken,
-  requireRoles
+  requireRoles,
+  verifyClientToken
 };

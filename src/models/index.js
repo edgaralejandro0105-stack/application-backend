@@ -19,6 +19,7 @@ const Provider = require('./Provider.model');
 const Catalog = require('./Catalog.model');
 const Notification = require('./Notification.model');
 const EventVenue = require('./EventVenue.model');
+const EventMilestone = require('./EventMilestone.model');
 
 // Definir Asociaciones
 
@@ -62,6 +63,10 @@ EventStaff.belongsTo(Event, { foreignKey: 'event_id' });
 Employee.hasMany(EventStaff, { foreignKey: 'employee_id' });
 EventStaff.belongsTo(Employee, { foreignKey: 'employee_id' });
 
+// Event - EventMilestone
+Event.hasMany(EventMilestone, { foreignKey: 'event_id', as: 'Milestones' });
+EventMilestone.belongsTo(Event, { foreignKey: 'event_id' });
+
 // Sale - SaleDetails
 Sale.hasMany(SaleDetail, { foreignKey: 'sale_id' });
 SaleDetail.belongsTo(Sale, { foreignKey: 'sale_id' });
@@ -93,5 +98,6 @@ module.exports = {
   Provider,
   Catalog,
   Notification,
-  EventVenue
+  EventVenue,
+  EventMilestone
 };

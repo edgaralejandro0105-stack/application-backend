@@ -23,6 +23,11 @@ class EventService {
     const offset = (page - 1) * limit;
 
     const where = {};
+    if (query.deleted === 'true') {
+      where.is_active = false;
+    } else {
+      where.is_active = { [Op.not]: false };
+    }
     if (query.status) where.status = query.status;
     if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
 
@@ -277,7 +282,14 @@ class EventService {
   async deleteEvent(id) {
     const event = await Event.findByPk(id);
     if (!event) throw new AppError('Evento no encontrado', 404);
-    await event.destroy();
+    await event.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreEvent(id) {
+    const event = await Event.findByPk(id);
+    if (!event) throw new AppError('Evento no encontrado', 404);
+    await event.update({ is_active: true, deleted_at: null });
     return true;
   }
 

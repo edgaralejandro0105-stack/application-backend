@@ -2,7 +2,7 @@ const userService = require('../services/user.service');
 const catchAsync = require('../utils/catchAsync');
 
 exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await userService.getAllUsers();
+  const users = await userService.getAllUsers(req.query);
   res.status(200).json(users);
 });
 
@@ -23,5 +23,10 @@ exports.updatePassword = catchAsync(async (req, res) => {
 
 exports.deleteUser = catchAsync(async (req, res) => {
   await userService.deleteUser(req.params.id);
-  res.status(200).json({ message: 'Usuario eliminado de la base de datos' });
+  res.status(200).json({ message: 'Usuario enviado a la papelera' });
+});
+
+exports.restoreUser = catchAsync(async (req, res) => {
+  await userService.restoreUser(req.params.id);
+  res.status(200).json({ message: 'Usuario restaurado' });
 });

@@ -23,6 +23,11 @@ exports.updateClient = catchAsync(async (req, res) => {
 
 exports.deleteClient = catchAsync(async (req, res) => {
   await clientService.deleteClient(req.params.id);
-  res.status(200).json({ message: 'Cliente eliminado de la base de datos' });
+  res.status(200).json({ message: 'Cliente movido a la papelera' });
+});
+
+exports.restoreClient = catchAsync(async (req, res) => {
+  await clientService.restoreClient(req.params.id);
+  res.status(200).json({ message: 'Cliente restaurado correctamente' });
 });
 

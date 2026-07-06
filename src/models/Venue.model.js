@@ -37,6 +37,10 @@ const Venue = db.define('Venue', {
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'venues',

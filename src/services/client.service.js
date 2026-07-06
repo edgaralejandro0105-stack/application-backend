@@ -22,7 +22,11 @@ class ClientService {
     }
 
     const options = { where, limit, offset, order: [['created_at', 'DESC']] };
-    if (query.includeDeleted === 'true') options.paranoid = false;
+    if (query.deleted === 'true') {
+      where.is_active = false;
+    } else {
+      where.is_active = { [Op.not]: false };
+    }
 
     const result = await Client.findAndCountAll(options);
     return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
@@ -44,7 +48,14 @@ class ClientService {
   async deleteClient(id) {
     const client = await Client.findByPk(id);
     if (!client) throw new AppError('Cliente no encontrado', 404);
-    await client.destroy();
+    await client.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreClient(id) {
+    const client = await Client.findByPk(id);
+    if (!client) throw new AppError('Cliente no encontrado', 404);
+    await client.update({ is_active: true, deleted_at: null });
     return true;
   }
 }

@@ -10,7 +10,7 @@ exports.createServiceExternal = catchAsync(async (req, res) => {
 });
 
 exports.getAllServiceExternal = catchAsync(async (req, res) => {
-  const services = await serviceExternalService.getAllServiceExternal();
+  const services = await serviceExternalService.getAllServiceExternal(req.query);
   res.status(200).json(services);
 });
 
@@ -34,5 +34,10 @@ exports.updateServiceExternal = catchAsync(async (req, res) => {
 
 exports.deleteServiceExternal = catchAsync(async (req, res) => {
   await serviceExternalService.deleteServiceExternal(req.params.id);
-  res.status(200).json({ message: 'Servicio externo eliminado' });
+  res.status(200).json({ message: 'Servicio externo enviado a la papelera' });
+});
+
+exports.restoreServiceExternal = catchAsync(async (req, res) => {
+  await serviceExternalService.restoreServiceExternal(req.params.id);
+  res.status(200).json({ message: 'Servicio externo restaurado' });
 });

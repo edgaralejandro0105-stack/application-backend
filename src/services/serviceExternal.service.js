@@ -6,9 +6,13 @@ class ServiceExternalService {
     return await ServiceExternal.create(data);
   }
 
-  async getAllServiceExternal() {
+  async getAllServiceExternal(query = {}) {
+    const whereCondition = query.deleted === 'true'
+      ? { is_active: false }
+      : { is_active: true };
+      
     return await ServiceExternal.findAll({ 
-      where: { is_active: true },
+      where: whereCondition,
       order: [['service_id', 'DESC']] 
     });
   }
@@ -38,7 +42,14 @@ class ServiceExternalService {
   async deleteServiceExternal(id) {
     const service = await ServiceExternal.findByPk(id);
     if (!service) throw new AppError('Servicio externo no encontrado', 404);
-    await service.update({ is_active: false });
+    await service.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreServiceExternal(id) {
+    const service = await ServiceExternal.findByPk(id);
+    if (!service) throw new AppError('Servicio externo no encontrado', 404);
+    await service.update({ is_active: true, deleted_at: null });
     return true;
   }
 }

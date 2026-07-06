@@ -25,6 +25,11 @@ class EmployeeService {
     if (query.status) {
       where.status = query.status;
     }
+    if (query.deleted === 'true') {
+      where.is_active = false;
+    } else {
+      where.is_active = { [Op.not]: false };
+    }
 
     const options = { 
       where, 
@@ -43,7 +48,6 @@ class EmployeeService {
         }
       ]
     };
-    if (query.includeDeleted === 'true') options.paranoid = false;
 
     const result = await Employee.findAndCountAll(options);
 
@@ -81,7 +85,14 @@ class EmployeeService {
   async deleteEmployee(id) {
     const employee = await Employee.findByPk(id);
     if (!employee) throw new AppError('Empleado no encontrado', 404);
-    await employee.destroy();
+    await employee.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreEmployee(id) {
+    const employee = await Employee.findByPk(id);
+    if (!employee) throw new AppError('Empleado no encontrado', 404);
+    await employee.update({ is_active: true, deleted_at: null });
     return true;
   }
 }

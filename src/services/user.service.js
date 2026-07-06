@@ -3,14 +3,14 @@ const { User, Role } = require('../models');
 const AppError = require('../utils/AppError');
 
 class UserService {
-  async getAllUsers() {
+  async getAllUsers(query = {}) {
     const { Op } = require('sequelize');
+    const whereCondition = query.deleted === 'true' 
+      ? { is_active: false } 
+      : { is_active: { [Op.not]: false } };
+
     return await User.findAll({
-      where: { 
-        is_active: {
-          [Op.not]: false
-        }
-      },
+      where: whereCondition,
       attributes: { exclude: ['password'] },
       include: [{ model: Role, attributes: ['role_name', 'access'] }]
     });
@@ -60,7 +60,14 @@ class UserService {
   async deleteUser(id) {
     const user = await User.findByPk(id);
     if (!user) throw new AppError('Usuario no encontrado', 404);
-    await user.update({ is_active: false });
+    await user.update({ is_active: false, deleted_at: new Date() });
+    return true;
+  }
+
+  async restoreUser(id) {
+    const user = await User.findByPk(id);
+    if (!user) throw new AppError('Usuario no encontrado', 404);
+    await user.update({ is_active: true, deleted_at: null });
     return true;
   }
 }

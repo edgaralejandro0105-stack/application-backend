@@ -17,21 +17,28 @@ const Client = db.define('Client', {
   last_name: {
     type: DataTypes.STRING(50),
     allowNull: false
-},
+  },
   doc_id: {
     type: DataTypes.STRING,
     unique: true, // REGLA: No pueden existir dos clientes con el mismo número de documento
     allowNull: false
-},
+  },
   phone: {
     type: DataTypes.STRING(50), // Ampliado a 50 caracteres para soportar formatos internacionales
   },
   email: {
     type: DataTypes.STRING(255)
-},
+  },
   direction: {
     type: DataTypes.STRING(80)
-}
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+  }
 }, {
   // Configuraciones adicionales del modelo
   tableName: 'clients', // Forzamos el nombre exacto de tu tabla en Postgres (sensible a mayúsculas)
@@ -39,8 +46,8 @@ const Client = db.define('Client', {
   // Traducimos los nombres que Sequelize crea por defecto (createdAt) a los que tú usaste en tu SQL
   createdAt: 'created_at', 
   updatedAt: false,
-  paranoid: false,
-  deletedAt: false
+  paranoid: true,
+  deletedAt: 'deleted_at'
 });
 
 module.exports = Client;

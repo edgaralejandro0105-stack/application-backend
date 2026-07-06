@@ -11,5 +11,6 @@ router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
 router.put('/:id', upload.single('image'), validateSchema(updateProductSchema), productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
+router.put('/:id/restore', productController.restoreProduct);
 
 module.exports = router;

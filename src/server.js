@@ -27,6 +27,7 @@ const reportsRoutes = require('./routes/reports.routes');
 const providersRoutes = require('./routes/providers.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const rolesRoutes = require('./routes/roles.routes');
+const clientPortalRoutes = require('./routes/clientPortal.routes');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -111,6 +112,7 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/providers', providersRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/roles', rolesRoutes);
+app.use('/api/client-portal', clientPortalRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

@@ -17,5 +17,6 @@ router.use(requireRoles('Gerente'));
 router.post('/', validateSchema(createEmployeeSchema), employeeController.createEmployee);
 router.put('/:id', employeeController.updateEmployee);
 router.delete('/:id', employeeController.deleteEmployee);
+router.put('/:id/restore', employeeController.restoreEmployee);
 
 module.exports = router;

@@ -29,6 +29,11 @@ exports.updateProduct = catchAsync(async (req, res) => {
 
 exports.deleteProduct = catchAsync(async (req, res) => {
   await productService.deleteProduct(req.params.id);
-  res.status(200).json({ message: 'Producto eliminado correctamente' });
+  res.status(200).json({ message: 'Producto movido a la papelera' });
+});
+
+exports.restoreProduct = catchAsync(async (req, res) => {
+  await productService.restoreProduct(req.params.id);
+  res.status(200).json({ message: 'Producto restaurado correctamente' });
 });
 

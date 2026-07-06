@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const { Op } = require('sequelize');
 const emailService = require('./email.service');
-const { Product, Sale, sequelize } = require('../models');
+const { Product, Sale, User, Venue, ServiceExternal, Client, Employee, Event, Provider, sequelize } = require('../models');
 
 class CronService {
   init() {
@@ -16,6 +16,14 @@ class CronService {
     }, {
       scheduled: true,
       timezone: "America/Bogota" // Ajusta a la zona horaria pertinente
+    });
+
+    cron.schedule('0 2 * * *', async () => {
+      console.log('⏰ Ejecutando limpieza de la papelera...');
+      await this.cleanupTrash();
+    }, {
+      scheduled: true,
+      timezone: "America/Bogota"
     });
 
     console.log('✅ Cron Jobs programados correctamente.');
@@ -71,6 +79,33 @@ class CronService {
       console.log('✅ Reporte semanal enviado al administrador con éxito.');
     } catch (error) {
       console.error('❌ Error generando el reporte semanal:', error);
+    }
+  }
+
+  async cleanupTrash() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    try {
+      const whereCondition = {
+        is_active: false,
+        deleted_at: {
+          [Op.lt]: thirtyDaysAgo
+        }
+      };
+
+      const deletedUsers = await User.destroy({ where: whereCondition });
+      const deletedVenues = await Venue.destroy({ where: whereCondition });
+      const deletedServices = await ServiceExternal.destroy({ where: whereCondition });
+      const deletedClients = await Client.destroy({ where: whereCondition, force: true });
+      const deletedEmployees = await Employee.destroy({ where: whereCondition, force: true });
+      const deletedEvents = await Event.destroy({ where: whereCondition });
+      const deletedProducts = await Product.destroy({ where: whereCondition, force: true });
+      const deletedProviders = await Provider.destroy({ where: whereCondition, force: true });
+
+      console.log(`[Cron] Cleanup completo. Eliminados permanentemente: ${deletedUsers} Usuarios, ${deletedVenues} Salones, ${deletedServices} Servicios, ${deletedClients} Clientes, ${deletedEmployees} Empleados, ${deletedEvents} Eventos, ${deletedProducts} Productos, ${deletedProviders} Proveedores.`);
+    } catch (error) {
+      console.error('[Cron] Error limpiando la papelera:', error);
     }
   }
 }
