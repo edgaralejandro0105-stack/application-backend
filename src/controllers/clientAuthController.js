@@ -32,3 +32,45 @@ exports.getMyInvoices = catchAsync(async (req, res) => {
   const invoices = await clientAuthService.getMyInvoices(req.user.client_id);
   res.status(200).json(invoices);
 });
+
+exports.getInvoicePayments = catchAsync(async (req, res) => {
+  const payments = await clientAuthService.getInvoicePayments(req.user.client_id, req.params.saleId);
+  res.status(200).json(payments);
+});
+
+exports.updateMilestone = catchAsync(async (req, res) => {
+  const { status } = req.body;
+  if (!status || !['Completed', 'In Progress', 'Pending'].includes(status)) {
+    return res.status(400).json({ message: 'Estado inválido. Debe ser: Completed, In Progress o Pending' });
+  }
+  const milestone = await clientAuthService.updateMilestone(req.user.client_id, req.params.eventId, req.params.milestoneId, status);
+  res.status(200).json(milestone);
+});
+
+exports.simulatePayment = catchAsync(async (req, res) => {
+  const { sale_id, amount, payment_method } = req.body;
+
+  if (!sale_id || !amount || !payment_method) {
+    return res.status(400).json({ message: 'Faltan campos requeridos: sale_id, amount, payment_method' });
+  }
+
+  const validMethods = ['Zelle', 'Efectivo', 'Transferencia', 'Punto de Venta', 'Pago Móvil'];
+  if (!validMethods.includes(payment_method)) {
+    return res.status(400).json({
+      message: `Método de pago inválido. Válidos: ${validMethods.join(', ')}`
+    });
+  }
+
+  const result = await clientAuthService.simulatePayment(
+    req.user.client_id,
+    sale_id,
+    amount,
+    payment_method
+  );
+
+  res.status(200).json({
+    success: true,
+    message: 'Pago simulado exitosamente',
+    ...result
+  });
+});

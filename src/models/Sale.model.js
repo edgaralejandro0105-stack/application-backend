@@ -19,13 +19,32 @@ const Sale = db.define('Sale', {
     allowNull: false,
     defaultValue: 0.00
   },
+  reference: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'paid', 'partial', 'overdue'),
+    defaultValue: 'pending'
+  },
   create_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
+  },
+  due_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
   }
 }, {
   tableName: 'sales',
-  timestamps: false
+  timestamps: false,
+  hooks: {
+    beforeCreate: (sale) => {
+      if (!sale.reference) {
+        sale.reference = `INV-${String(Date.now()).slice(-6)}`;
+      }
+    }
+  }
 });
 
 Sale.belongsTo(Employee, { foreignKey: 'employee_id' });

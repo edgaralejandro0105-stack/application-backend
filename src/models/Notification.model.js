@@ -20,7 +20,7 @@ const Notification = db.define('Notification', {
     allowNull: false
   },
   type: {
-    type: DataTypes.ENUM('info', 'warning', 'success', 'error', 'event_update'),
+    type: DataTypes.ENUM('info', 'warning', 'success', 'error', 'event_update', 'reservation', 'payment'),
     defaultValue: 'info'
   },
   read: {

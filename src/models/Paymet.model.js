@@ -10,7 +10,7 @@ const Payment = db.define('Payment', {
   },
   sale_id: {
     type: DataTypes.INTEGER,
-    allowNull: true, // Puede ser nulo si el pago es directo a un evento
+    allowNull: true,
     references: { model: Sale, key: 'sale_id' }
   },
   amount: {
@@ -20,6 +20,10 @@ const Payment = db.define('Payment', {
   method: {
     type: DataTypes.ENUM('Zelle', 'Efectivo', 'Transferencia', 'Punto de Venta', 'Pago Móvil'),
     allowNull: false
+  },
+  simulated: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
   },
   date: {
     type: DataTypes.DATE,

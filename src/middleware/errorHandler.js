@@ -67,9 +67,11 @@ const errorHandler = (err, req, res, next) => {
 
   // Errores de programación u otros errores desconocidos
   console.error('ERROR 💥', err);
+  console.error('ERROR DETAIL:', err.parent?.detail || err.original?.detail || 'no detail');
   return res.status(500).json({
     status: 'error',
-    message: 'Algo salió muy mal!'
+    message: `Error interno: ${err.message}`,
+    detail: err.parent?.detail || err.original?.detail || err.message
   });
 };
 

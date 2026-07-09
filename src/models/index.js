@@ -78,6 +78,10 @@ SaleDetail.belongsTo(Product, { foreignKey: 'product_id' });
 Event.hasMany(Sale, { foreignKey: 'event_id' });
 Sale.belongsTo(Event, { foreignKey: 'event_id' });
 
+// Sale - Payment
+Sale.hasMany(Payment, { foreignKey: 'sale_id' });
+Payment.belongsTo(Sale, { foreignKey: 'sale_id' });
+
 // Exportar modelos y la conexión
 module.exports = {
   sequelize,

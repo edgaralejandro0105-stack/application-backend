@@ -191,6 +191,12 @@ async function startServer() {
         await sequelize.query(`ALTER TABLE services_external ADD COLUMN IF NOT EXISTS description TEXT;`).catch(() => { });
         await sequelize.query(`ALTER TABLE services_external ADD COLUMN IF NOT EXISTS image_url VARCHAR(255);`).catch(() => { });
 
+        // 10. Agregar columna simulated a payments si no existe
+        await sequelize.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS simulated BOOLEAN DEFAULT TRUE;`).catch(() => { });
+
+        // 11. Agregar due_date a sales para vencimiento de facturas
+        await sequelize.query(`ALTER TABLE sales ADD COLUMN IF NOT EXISTS due_date DATE;`).catch(() => { });
+
         // Planner Pricing
         await sequelize.query(`ALTER TABLE venues ADD COLUMN IF NOT EXISTS base_price DECIMAL(10, 2) DEFAULT 0.00;`).catch(() => { });
         await sequelize.query(`ALTER TABLE employees ADD COLUMN IF NOT EXISTS salary_per_event DECIMAL(10, 2) DEFAULT 0.00;`).catch(() => { });

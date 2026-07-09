@@ -10,6 +10,9 @@ router.post('/login', clientAuthController.login);
 router.use(verifyClientToken);
 router.get('/my-events', clientAuthController.getMyEvents);
 router.get('/my-events/:eventId/milestones', clientAuthController.getEventMilestones);
+router.patch('/my-events/:eventId/milestones/:milestoneId', clientAuthController.updateMilestone);
 router.get('/my-invoices', clientAuthController.getMyInvoices);
+router.get('/my-invoices/:saleId/payments', clientAuthController.getInvoicePayments);
+router.post('/payments/simulate', clientAuthController.simulatePayment);
 
 module.exports = router;
