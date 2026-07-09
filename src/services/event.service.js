@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Event, Client, Venue, EventItem, EventStaff, ServiceExternal, Employee } = require('../models');
+const { Event, Client, Venue, EventItem, EventStaff, ServiceExternal, Employee, Sale } = require('../models');
 const sequelize = require('../config/db');
 const AppError = require('../utils/AppError');
 
@@ -192,11 +192,19 @@ class EventService {
       await EventVenue.create({ event_id: newEvent.event_id, venue_id: venueId });
     }
 
+    // 5. Create Sale (invoice) with estimated total
+    const estimatedTotal = data.precio_estimado || 0;
+    const sale = await Sale.create({
+      event_id: newEvent.event_id,
+      total: estimatedTotal,
+      status: 'pending'
+    });
+
     // Optionally attach extra fields for the notification
     newEvent.dataValues.event_date = data.fecha;
     newEvent.dataValues.id = newEvent.event_id;
     
-    return newEvent;
+    return { event: newEvent, sale };
   }
 
   async getEventById(id) {

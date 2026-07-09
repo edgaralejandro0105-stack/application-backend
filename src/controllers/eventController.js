@@ -15,7 +15,8 @@ exports.createEvent = catchAsync(async (req, res) => {
 });
 
 exports.createWebsiteReservation = catchAsync(async (req, res) => {
-  const newEvent = await eventService.createWebsiteReservation(req.body);
+  const result = await eventService.createWebsiteReservation(req.body);
+  const { event: newEvent, sale } = result;
 
   // Notificación por Socket.io
   const io = req.app.get('io');
@@ -40,45 +41,11 @@ exports.createWebsiteReservation = catchAsync(async (req, res) => {
     console.error('Error al guardar notificación en BD:', err);
   }
 
-  // Notificación por Correo (Deshabilitado en backend porque ahora se envía desde el Frontend usando EmailJS debido al bloqueo SMTP de Render)
-  /*
-  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@lacasona.com').trim();
-  const adminUrl = (process.env.FRONTEND_URL || 'http://localhost:3001').trim();
-  
-  emailService.sendEmail({
-    to: adminEmail,
-    subject: '¡Nueva Pre-reserva Web Recibida!',
-    templateName: 'new-reservation',
-    context: {
-      nombre: req.body.contacto?.nombre || 'Desconocido',
-      telefono: req.body.contacto?.telefono || 'N/A',
-      fecha: req.body.fecha ? req.body.fecha.split('-').reverse().join('/') : 'N/A',
-      salon: req.body.salon || 'N/A',
-      horario: req.body.horario || 'N/A',
-      tipo: req.body.tipo || 'N/A',
-      adminUrl
-    }
-  }).catch(err => console.error('Error enviando correo de nueva reserva web:', err));
-
-  // Notificación al Cliente
-  if (req.body.contacto?.correo) {
-    emailService.sendEmail({
-      to: req.body.contacto.correo,
-      subject: 'Hemos recibido tu solicitud - La Casona Eventos',
-      templateName: 'client-received',
-      context: {
-        nombre: req.body.contacto.nombre || 'Cliente',
-        telefono: req.body.contacto.telefono || 'N/A',
-        fecha: req.body.fecha ? req.body.fecha.split('-').reverse().join('/') : 'N/A',
-        salon: req.body.salon || 'N/A',
-        horario: req.body.horario || 'N/A',
-        tipo: req.body.tipo || 'N/A'
-      }
-    }).catch(err => console.error('Error enviando correo de confirmación al cliente:', err));
-  }
-  */
-
-  res.status(201).json({ message: 'Pre-reserva web creada correctamente', data: newEvent });
+  res.status(201).json({
+    message: 'Pre-reserva web creada correctamente',
+    data: newEvent,
+    sale
+  });
 });
 
 exports.getEventById = catchAsync(async (req, res) => {
