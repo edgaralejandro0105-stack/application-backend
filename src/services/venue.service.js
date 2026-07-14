@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Venue } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class VenueService {
   async getAllVenues(query) {
@@ -24,7 +25,9 @@ class VenueService {
   }
 
   async createVenue(data) {
-    return await Venue.create(data);
+    const venue = await Venue.create(data);
+    await invalidateTags(['venues', 'events', 'dashboard']);
+    return venue;
   }
 
   async getVenueById(id) {
@@ -37,6 +40,7 @@ class VenueService {
     const venue = await Venue.findByPk(id);
     if (!venue) throw new AppError('Salón no encontrado', 404);
     await venue.update(data);
+    await invalidateTags(['venues', 'events', 'dashboard']);
     return venue;
   }
 
@@ -44,6 +48,7 @@ class VenueService {
     const venue = await Venue.findByPk(id);
     if (!venue) throw new AppError('Salón no encontrado', 404);
     await venue.update({ is_active: false, deleted_at: new Date() });
+    await invalidateTags(['venues', 'events', 'dashboard']);
     return true;
   }
 
@@ -51,6 +56,7 @@ class VenueService {
     const venue = await Venue.findByPk(id);
     if (!venue) throw new AppError('Salón no encontrado', 404);
     await venue.update({ is_active: true, deleted_at: null });
+    await invalidateTags(['venues', 'events', 'dashboard']);
     return true;
   }
 }

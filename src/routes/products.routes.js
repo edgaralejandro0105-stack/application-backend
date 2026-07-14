@@ -4,11 +4,11 @@ const productController = require('../controllers/productController');
 const validateSchema = require('../middleware/validateSchema');
 const { createProductSchema, updateProductSchema } = require('../schemas/product.schema');
 const upload = require('../middleware/uploadMiddleware');
+const cacheMiddleware = require('../middleware/cache');
 
-// URL base: /api/products
 router.post('/', upload.single('image'), validateSchema(createProductSchema), productController.createProduct);
-router.get('/', productController.getAllProducts);
-router.get('/:id', productController.getProductById);
+router.get('/', cacheMiddleware(120, 'products'), productController.getAllProducts);
+router.get('/:id', cacheMiddleware(120, 'products'), productController.getProductById);
 router.put('/:id', upload.single('image'), validateSchema(updateProductSchema), productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 router.put('/:id/restore', productController.restoreProduct);

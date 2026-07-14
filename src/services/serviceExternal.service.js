@@ -1,9 +1,12 @@
 const { ServiceExternal } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class ServiceExternalService {
   async createServiceExternal(data) {
-    return await ServiceExternal.create(data);
+    const service = await ServiceExternal.create(data);
+    await invalidateTags(['service-external', 'events']);
+    return service;
   }
 
   async getAllServiceExternal(query = {}) {
@@ -36,6 +39,7 @@ class ServiceExternalService {
     const service = await ServiceExternal.findByPk(id);
     if (!service) throw new AppError('Servicio externo no encontrado', 404);
     await service.update(data);
+    await invalidateTags(['service-external', 'events']);
     return service;
   }
 
@@ -43,6 +47,7 @@ class ServiceExternalService {
     const service = await ServiceExternal.findByPk(id);
     if (!service) throw new AppError('Servicio externo no encontrado', 404);
     await service.update({ is_active: false, deleted_at: new Date() });
+    await invalidateTags(['service-external', 'events']);
     return true;
   }
 
@@ -50,6 +55,7 @@ class ServiceExternalService {
     const service = await ServiceExternal.findByPk(id);
     if (!service) throw new AppError('Servicio externo no encontrado', 404);
     await service.update({ is_active: true, deleted_at: null });
+    await invalidateTags(['service-external', 'events']);
     return true;
   }
 }

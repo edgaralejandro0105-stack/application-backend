@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { Event, Client, Venue, EventItem, EventStaff, ServiceExternal, Employee, Sale } = require('../models');
 const sequelize = require('../config/db');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 const EVENT_INCLUDE = [
   { model: Client, attributes: ['name', 'last_name', 'doc_id', 'phone'] },
@@ -112,6 +113,7 @@ class EventService {
       await EventStaff.bulkCreate(staffMembers);
     }
 
+    await invalidateTags(['events', 'dashboard']);
     return newEvent;
   }
 
@@ -204,6 +206,7 @@ class EventService {
     newEvent.dataValues.event_date = data.fecha;
     newEvent.dataValues.id = newEvent.event_id;
     
+    await invalidateTags(['events', 'dashboard']);
     return { event: newEvent, sale };
   }
 
@@ -284,6 +287,7 @@ class EventService {
       }
     }
 
+    await invalidateTags(['events', 'dashboard']);
     return event;
   }
 
@@ -291,6 +295,7 @@ class EventService {
     const event = await Event.findByPk(id);
     if (!event) throw new AppError('Evento no encontrado', 404);
     await event.update({ is_active: false, deleted_at: new Date() });
+    await invalidateTags(['events', 'dashboard']);
     return true;
   }
 
@@ -298,6 +303,7 @@ class EventService {
     const event = await Event.findByPk(id);
     if (!event) throw new AppError('Evento no encontrado', 404);
     await event.update({ is_active: true, deleted_at: null });
+    await invalidateTags(['events', 'dashboard']);
     return true;
   }
 

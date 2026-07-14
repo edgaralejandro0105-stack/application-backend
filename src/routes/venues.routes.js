@@ -5,16 +5,14 @@ const validateSchema = require('../middleware/validateSchema');
 const { createVenueSchema } = require('../schemas/venue.schema');
 const upload = require('../middleware/uploadMiddleware');
 const { verifyToken, requireRoles } = require('../middleware/authMiddleware');
+const cacheMiddleware = require('../middleware/cache');
 
-// Rutas públicas (para la web)
-router.get('/', venueController.getAllVenues);
-router.get('/:id', venueController.getVenueById);
+router.get('/', cacheMiddleware(300, 'venues'), venueController.getAllVenues);
+router.get('/:id', cacheMiddleware(300, 'venues'), venueController.getVenueById);
 
-// A partir de aquí, protegemos las rutas internas
 router.use(verifyToken);
 router.use(requireRoles('Gerente', 'Ventas'));
 
-// URL base: /api/venues
 router.post('/', upload.single('image'), validateSchema(createVenueSchema), venueController.createVenue);
 router.put('/:id', upload.single('image'), venueController.updateVenue);
 router.delete('/:id', venueController.deleteVenue);

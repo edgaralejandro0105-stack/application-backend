@@ -1,10 +1,13 @@
 const { Op } = require('sequelize');
 const { Employee, EventStaff, Event, Venue } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class EmployeeService {
   async createEmployee(data) {
-    return await Employee.create(data);
+    const employee = await Employee.create(data);
+    await invalidateTags(['employees', 'events']);
+    return employee;
   }
 
   async getAllEmployees(query) {
@@ -79,6 +82,7 @@ class EmployeeService {
     const employee = await Employee.findByPk(id);
     if (!employee) throw new AppError('Empleado no encontrado', 404);
     await employee.update(data);
+    await invalidateTags(['employees', 'events']);
     return employee;
   }
 
@@ -86,6 +90,7 @@ class EmployeeService {
     const employee = await Employee.findByPk(id);
     if (!employee) throw new AppError('Empleado no encontrado', 404);
     await employee.update({ is_active: false, deleted_at: new Date() });
+    await invalidateTags(['employees', 'events']);
     return true;
   }
 
@@ -93,6 +98,7 @@ class EmployeeService {
     const employee = await Employee.findByPk(id);
     if (!employee) throw new AppError('Empleado no encontrado', 404);
     await employee.update({ is_active: true, deleted_at: null });
+    await invalidateTags(['employees', 'events']);
     return true;
   }
 }

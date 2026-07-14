@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { sequelize, Sale, SaleDetail, Product, Employee } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class SaleService {
   async createSale(data) {
@@ -38,6 +39,7 @@ class SaleService {
       }
 
       await t.commit();
+      await invalidateTags(['dashboard']);
       return sale;
     } catch (error) {
       await t.rollback();
@@ -72,6 +74,7 @@ class SaleService {
     const sale = await Sale.findByPk(id);
     if (!sale) throw new AppError('Venta no encontrada', 404);
     await sale.update(data);
+    await invalidateTags(['dashboard']);
     return sale;
   }
 
@@ -79,6 +82,7 @@ class SaleService {
     const sale = await Sale.findByPk(id);
     if (!sale) throw new AppError('Venta no encontrada', 404);
     await sale.destroy();
+    await invalidateTags(['dashboard']);
     return true;
   }
 }

@@ -1,10 +1,13 @@
 const { Op } = require('sequelize');
 const { Client } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class ClientService {
   async createClient(data) {
-    return await Client.create(data);
+    const client = await Client.create(data);
+    await invalidateTags(['clients', 'events']);
+    return client;
   }
 
   async getAllClients(query) {
@@ -42,6 +45,7 @@ class ClientService {
     const client = await Client.findByPk(id);
     if (!client) throw new AppError('Cliente no encontrado', 404);
     await client.update(data);
+    await invalidateTags(['clients', 'events']);
     return client;
   }
 
@@ -49,6 +53,7 @@ class ClientService {
     const client = await Client.findByPk(id);
     if (!client) throw new AppError('Cliente no encontrado', 404);
     await client.update({ is_active: false, deleted_at: new Date() });
+    await invalidateTags(['clients', 'events']);
     return true;
   }
 
@@ -56,6 +61,7 @@ class ClientService {
     const client = await Client.findByPk(id);
     if (!client) throw new AppError('Cliente no encontrado', 404);
     await client.update({ is_active: true, deleted_at: null });
+    await invalidateTags(['clients', 'events']);
     return true;
   }
 }

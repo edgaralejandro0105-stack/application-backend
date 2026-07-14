@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { InventoryBar, Product, User } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class InventoryService {
   async createInventoryItem(data) {
@@ -25,6 +26,7 @@ class InventoryService {
     }
     
     const item = await InventoryBar.create(data);
+    await invalidateTags(['products', 'dashboard']);
     return item;
   }
 
@@ -86,6 +88,7 @@ class InventoryService {
     const item = await InventoryBar.findByPk(id);
     if (!item) throw new AppError('Registro de inventario no encontrado', 404);
     await item.update(data);
+    await invalidateTags(['products', 'dashboard']);
     return item;
   }
 
@@ -93,6 +96,7 @@ class InventoryService {
     const item = await InventoryBar.findByPk(id);
     if (!item) throw new AppError('Registro de inventario no encontrado', 404);
     await item.destroy();
+    await invalidateTags(['products', 'dashboard']);
     return true;
   }
 }

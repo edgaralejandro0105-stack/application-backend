@@ -1,9 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const { strictLimiter, mediumLimiter, standardLimiter, globalLimiter } = require('./middleware/rateLimiter');
+const redis = require('./config/redis');
 
 // Base de datos y Modelos centralizados
 const { sequelize } = require('./models');
@@ -35,13 +36,6 @@ const app = express();
 app.set('trust proxy', 1);
 const server = require('http').createServer(app);
 
-
-// Rate Limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: process.env.NODE_ENV === 'production' ? 100 : 10000, // 100 en prod, 10000 en dev
-    message: 'Demasiadas peticiones desde esta IP, por favor intente de nuevo en 15 minutos.'
-});
 
 // Middlewares globales
 app.use(helmet());
@@ -91,28 +85,50 @@ io.on('connection', (socket) => {
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Aplicar rate limiter solo a la API
-app.use('/api', limiter);
-
-// Rutas de la API
+// Rate Limiting por capas — Strict (auth / login)
+app.use('/api/auth', strictLimiter);
 app.use('/api/auth', authRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/employees', employeesRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/sales', salesRoutes);
-app.use('/api/venues', venuesRoutes);
-app.use('/api/products', productsRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/event-items', eventItemsRoutes);
-app.use('/api/event-staff', eventStaffRoutes);
-app.use('/api/service-external', serviceExternalRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/reports', reportsRoutes);
-app.use('/api/providers', providersRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/roles', rolesRoutes);
+app.use('/api/client-portal', strictLimiter);
 app.use('/api/client-portal', clientPortalRoutes);
+
+// Medium (mutaciones / admin)
+app.use('/api/clients', mediumLimiter);
+app.use('/api/clients', clientRoutes);
+app.use('/api/employees', mediumLimiter);
+app.use('/api/employees', employeesRoutes);
+app.use('/api/inventory', mediumLimiter);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/sales', mediumLimiter);
+app.use('/api/sales', salesRoutes);
+app.use('/api/venues', mediumLimiter);
+app.use('/api/venues', venuesRoutes);
+app.use('/api/providers', mediumLimiter);
+app.use('/api/providers', providersRoutes);
+app.use('/api/users', mediumLimiter);
+app.use('/api/users', usersRoutes);
+
+// Standard (lectura / públicos)
+app.use('/api/events', standardLimiter);
+app.use('/api/events', eventsRoutes);
+app.use('/api/products', standardLimiter);
+app.use('/api/products', productsRoutes);
+app.use('/api/event-items', standardLimiter);
+app.use('/api/event-items', eventItemsRoutes);
+app.use('/api/event-staff', standardLimiter);
+app.use('/api/event-staff', eventStaffRoutes);
+app.use('/api/service-external', standardLimiter);
+app.use('/api/service-external', serviceExternalRoutes);
+app.use('/api/dashboard', standardLimiter);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', standardLimiter);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/notifications', standardLimiter);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/roles', standardLimiter);
+app.use('/api/roles', rolesRoutes);
+
+// Global — catch-all para cualquier ruta /api no clasificada
+app.use('/api', globalLimiter);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -127,6 +143,8 @@ const PORT = process.env.PORT || 3000;
 // 2. SINCRONIZACIÓN Y ARRANQUE
 async function startServer() {
     try {
+        await redis.connect();
+
         // ─── Fixes puntuales de columnas ───────────────────────────────────────
         // 1. Rellenar timestamps NULL en todas las tablas (evita errores al insertar)
         await sequelize.query(`

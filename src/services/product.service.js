@@ -1,10 +1,12 @@
 const { Op, Sequelize } = require('sequelize');
 const { Product } = require('../models');
 const AppError = require('../utils/AppError');
+const { invalidateTags } = require('../utils/cacheInvalidator');
 
 class ProductService {
   async createProduct(data) {
     const product = await Product.create(data);
+    await invalidateTags(['products', 'dashboard']);
     return product;
   }
 
@@ -96,6 +98,7 @@ class ProductService {
     }
     
     await product.update(data);
+    await invalidateTags(['products', 'dashboard']);
     return product;
   }
 
@@ -106,6 +109,7 @@ class ProductService {
     }
     
     await product.update({ is_active: false, deleted_at: new Date() });
+    await invalidateTags(['products', 'dashboard']);
     return true;
   }
 
@@ -116,6 +120,7 @@ class ProductService {
     }
     
     await product.update({ is_active: true, deleted_at: null });
+    await invalidateTags(['products', 'dashboard']);
     return true;
   }
 }
