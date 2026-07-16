@@ -27,6 +27,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 const reportsRoutes = require('./routes/reports.routes');
 const providersRoutes = require('./routes/providers.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const paymentsRoutes = require('./routes/payments.routes');
 const rolesRoutes = require('./routes/roles.routes');
 const clientPortalRoutes = require('./routes/clientPortal.routes');
 
@@ -124,6 +125,8 @@ app.use('/api/reports', standardLimiter);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/notifications', standardLimiter);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', standardLimiter);
+app.use('/api/payments', paymentsRoutes);
 app.use('/api/roles', standardLimiter);
 app.use('/api/roles', rolesRoutes);
 
