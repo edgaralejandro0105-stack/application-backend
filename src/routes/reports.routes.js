@@ -13,5 +13,6 @@ router.get('/clients/pdf', reportController.getClientsPDF);
 router.get('/providers/pdf', reportController.getProvidersPDF);
 router.get('/sales/pdf', reportController.getSalesPDF);
 router.get('/employees/pdf', reportController.getEmployeesPDF);
+router.get('/events/:id/contract', reportController.getEventContractPDF);
 
 module.exports = router;

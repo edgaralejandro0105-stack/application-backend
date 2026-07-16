@@ -50,3 +50,21 @@ exports.getEmployeesPDF = catchAsync(async (req, res) => {
   res.setHeader('Content-Disposition', 'attachment; filename=empleados.pdf');
   res.send(buffer);
 });
+
+exports.getEventContractPDF = catchAsync(async (req, res) => {
+  const { Event, Client, Venue, EventItem, ServiceExternal, EventStaff, Employee } = require('../models');
+  const event = await Event.findByPk(req.params.id, {
+    include: [
+      { model: Client, attributes: ['name', 'last_name', 'doc_id', 'phone', 'email'] },
+      { model: Venue, attributes: ['venue_id', 'name'], through: { attributes: [] } },
+      { model: EventItem, include: [{ model: ServiceExternal, attributes: ['name', 'service_type'] }] }
+    ]
+  });
+  if (!event) {
+    return res.status(404).json({ message: 'Evento no encontrado' });
+  }
+  const buffer = await reportService.generateEventContractPDF(event);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=contrato_evento_${event.event_id}.pdf`);
+  res.send(buffer);
+});
