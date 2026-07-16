@@ -12,7 +12,7 @@ const send429 = (message, req, res) => {
 
 const loginLimiter = rateLimit({
     windowMs,
-    max: isProd ? 10 : 5,
+    max: isProd ? 5 : 5,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -20,19 +20,9 @@ const loginLimiter = rateLimit({
     }
 });
 
-const strictLimiter = rateLimit({
-    windowMs,
-    max: isProd ? 10 : 3000,
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        send429('Demasiados intentos de autenticación. Intente de nuevo en 15 minutos.', req, res);
-    }
-});
-
 const mediumLimiter = rateLimit({
     windowMs,
-    max: isProd ? 50 : 3000,
+    max: isProd ? 50 : 15,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -42,7 +32,7 @@ const mediumLimiter = rateLimit({
 
 const standardLimiter = rateLimit({
     windowMs,
-    max: isProd ? 100 : 3000,
+    max: isProd ? 100 : 30,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -52,7 +42,7 @@ const standardLimiter = rateLimit({
 
 const globalLimiter = rateLimit({
     windowMs,
-    max: isProd ? 200 : 3000,
+    max: isProd ? 200 : 60,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -60,4 +50,4 @@ const globalLimiter = rateLimit({
     }
 });
 
-module.exports = { loginLimiter, strictLimiter, mediumLimiter, standardLimiter, globalLimiter };
+module.exports = { loginLimiter, mediumLimiter, standardLimiter, globalLimiter };
