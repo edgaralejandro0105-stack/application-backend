@@ -187,6 +187,24 @@ class ReportService {
           y += 27;
         });
 
+        y += 20;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(1).strokeColor('#e4e4e7').stroke();
+        y += 24;
+
+        doc.rect(50, y, 495, 28).fill('#f8f4ff');
+        doc.rect(50, y, 6, 28).fill('#8b5cf6');
+        doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
+        doc.text('Firma', 66, y + 7);
+        y += 50;
+
+        doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
+        doc.text('Dr. Isabel Parada', 50, y);
+        doc.fillColor('#71717a').fontSize(9).font('Helvetica');
+        doc.text('Propietaria - La Casona Eventos', 50, y + 14);
+        doc.moveTo(50, y + 40).lineTo(240, y + 40).lineWidth(1).strokeColor('#18181b').stroke();
+        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica-Oblique');
+        doc.text('Firma de la Propietaria', 50, y + 44);
+
         this._drawFooter(doc);
         doc.end();
       } catch (error) {
@@ -195,7 +213,7 @@ class ReportService {
     });
   }
 
-  async _generateBasePDF(title, headers, dataRows, columnWidths, columnAlignments) {
+  async _generateBasePDF(title, headers, dataRows, columnWidths, columnAlignments, showSignature = true) {
     return new Promise((resolve, reject) => {
       try {
         const doc = new PDFDocument({ margin: 50, size: 'A4' });
@@ -219,6 +237,32 @@ class ReportService {
           this._drawTableRow(doc, row, columnWidths, y, columnAlignments, index);
           y += 27;
         });
+
+        if (showSignature) {
+          y += 20;
+          if (y > 700) {
+            this._drawFooter(doc);
+            doc.addPage();
+            y = this._drawCompactHeader(doc, title);
+            y += 20;
+          }
+          doc.moveTo(50, y).lineTo(545, y).lineWidth(1).strokeColor('#e4e4e7').stroke();
+          y += 24;
+
+          doc.rect(50, y, 495, 28).fill('#f8f4ff');
+          doc.rect(50, y, 6, 28).fill('#8b5cf6');
+          doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
+          doc.text('Firma', 66, y + 7);
+          y += 50;
+
+          doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
+          doc.text('Dr. Isabel Parada', 50, y);
+          doc.fillColor('#71717a').fontSize(9).font('Helvetica');
+          doc.text('Propietaria - La Casona Eventos', 50, y + 14);
+          doc.moveTo(50, y + 40).lineTo(240, y + 40).lineWidth(1).strokeColor('#18181b').stroke();
+          doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica-Oblique');
+          doc.text('Firma de la Propietaria', 50, y + 44);
+        }
 
         this._drawFooter(doc);
         doc.end();
@@ -391,6 +435,37 @@ class ReportService {
           doc.text('No hay servicios externos contratados para este evento.', 50, y);
           y += 22;
         }
+
+        y += 20;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(1).strokeColor('#e4e4e7').stroke();
+        y += 24;
+
+        // Signature Section
+        doc.rect(50, y, 495, 28).fill('#f8f4ff');
+        doc.rect(50, y, 6, 28).fill('#8b5cf6');
+        doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
+        doc.text('Firmas', 66, y + 7);
+        y += 50;
+
+        // Left: Owner signature
+        doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
+        doc.text('Dr. Isabel Parada', 50, y);
+        doc.fillColor('#71717a').fontSize(9).font('Helvetica');
+        doc.text('Propietaria - La Casona Eventos', 50, y + 14);
+
+        doc.moveTo(50, y + 40).lineTo(240, y + 40).lineWidth(1).strokeColor('#18181b').stroke();
+        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica-Oblique');
+        doc.text('Firma de la Propietaria', 50, y + 44);
+
+        // Right: Client signature
+        doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
+        doc.text(`${event.Client?.name || 'Cliente'} ${event.Client?.last_name || ''}`.trim(), 310, y);
+        doc.fillColor('#71717a').fontSize(9).font('Helvetica');
+        doc.text('Cliente', 310, y + 14);
+
+        doc.moveTo(310, y + 40).lineTo(500, y + 40).lineWidth(1).strokeColor('#18181b').stroke();
+        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica-Oblique');
+        doc.text('Firma del Cliente', 310, y + 44);
 
         this._drawFooter(doc);
         doc.end();
