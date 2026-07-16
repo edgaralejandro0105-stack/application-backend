@@ -5,7 +5,7 @@ const AppError = require('../utils/AppError');
 const { invalidateTags } = require('../utils/cacheInvalidator');
 
 const EVENT_INCLUDE = [
-  { model: Client, attributes: ['name', 'last_name', 'doc_id', 'phone'] },
+  { model: Client, attributes: ['name', 'last_name', 'doc_id', 'phone', 'email'] },
   { model: Venue, attributes: ['venue_id', 'name'], through: { attributes: [] } },
   { 
     model: EventStaff, 
