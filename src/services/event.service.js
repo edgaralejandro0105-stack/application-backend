@@ -31,6 +31,14 @@ class EventService {
     }
     if (query.status) where.status = query.status;
     if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
+    if (query.upcoming === 'true') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (!where.end_date) {
+        where.end_date = {};
+      }
+      where.end_date[Op.gte] = today;
+    }
 
     if (user && user.Role && user.Role.role_name === 'Staff') {
       const employee = await Employee.findOne({ 

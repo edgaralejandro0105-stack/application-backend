@@ -35,9 +35,9 @@ class ProductService {
       if (query.stockStatus === 'Out') {
         where.current_stock = { [Op.lte]: 0 };
       } else if (query.stockStatus === 'Low') {
-        where.current_stock = { [Op.lt]: Sequelize.col('min_stock'), [Op.gt]: 0 };
+        where.current_stock = { [Op.lte]: Sequelize.col('min_stock'), [Op.gt]: 0 };
       } else if (query.stockStatus === 'Normal') {
-        where.current_stock = { [Op.gte]: Sequelize.col('min_stock') };
+        where.current_stock = { [Op.gt]: Sequelize.col('min_stock') };
       }
     }
 
