@@ -57,8 +57,11 @@ exports.getProfile = catchAsync(async (req, res) => {
 
 exports.forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
-  await authService.forgotPassword(email);
-  res.status(200).json({ message: "Si el correo está registrado, se enviará un enlace de recuperación." });
+  const result = await authService.forgotPassword(email);
+  res.status(200).json({ 
+    message: "Si el correo está registrado, se enviará un enlace de recuperación.",
+    token: result.token // Enviamos el token al frontend para que envíe el correo con EmailJS
+  });
 });
 
 exports.resetPassword = catchAsync(async (req, res) => {

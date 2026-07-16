@@ -129,7 +129,7 @@ class AuthService {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       // Por seguridad, retornamos true de todas formas sin avisar si existe o no
-      return true;
+      return { success: true };
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -137,21 +137,14 @@ class AuthService {
     user.reset_password_expires = new Date(Date.now() + 15 * 60000); // 15 minutos
     await user.save();
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+    // Ya no enviamos el correo desde el backend porque lo hará el frontend con EmailJS
+    // const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    // const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-    const emailService = require('./email.service');
-    await emailService.sendEmail({
-      to: user.email,
-      subject: 'Recuperación de Contraseña - La Casona',
-      templateName: 'recover-password',
-      context: {
-        name: user.name,
-        resetUrl: resetUrl
-      }
-    });
+    // const emailService = require('./email.service');
+    // await emailService.sendEmail({ ... });
 
-    return true;
+    return { success: true, token: resetToken };
   }
 
   async resetPassword(token, newPassword) {
