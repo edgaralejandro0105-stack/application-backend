@@ -94,7 +94,7 @@ class DashboardService {
     const [allEvents, sales, activeClientsCount, lowStockProducts] = await Promise.all([
       canViewEvents ? Event.findAll({ where: eventWhere, include: eventInclude }) : [],
       canViewSales ? Sale.findAll({
-        include: [{ model: Event, attributes: ['name', 'title'] }],
+        include: [{ model: Event, attributes: ['title'] }],
         order: [['create_at', 'DESC']]
       }) : [],
       canViewClients ? Client.count({ where: { is_active: true } }) : 0,
