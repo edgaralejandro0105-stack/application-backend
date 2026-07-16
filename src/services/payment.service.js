@@ -16,6 +16,11 @@ class PaymentService {
         [Op.between]: [new Date(query.startDate), new Date(query.endDate)]
       };
     }
+    if (query.minAmount || query.maxAmount) {
+      where.amount = {};
+      if (query.minAmount) where.amount[Op.gte] = parseFloat(query.minAmount);
+      if (query.maxAmount) where.amount[Op.lte] = parseFloat(query.maxAmount);
+    }
 
     const result = await Payment.findAndCountAll({
       where,
