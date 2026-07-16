@@ -12,7 +12,7 @@ const send429 = (message, req, res) => {
 
 const strictLimiter = rateLimit({
     windowMs,
-    max: isProd ? 10 : 5,
+    max: isProd ? 10 : 3000,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -22,7 +22,7 @@ const strictLimiter = rateLimit({
 
 const mediumLimiter = rateLimit({
     windowMs,
-    max: isProd ? 50 : 15,
+    max: isProd ? 50 : 3000,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -32,7 +32,7 @@ const mediumLimiter = rateLimit({
 
 const standardLimiter = rateLimit({
     windowMs,
-    max: isProd ? 100 : 30,
+    max: isProd ? 100 : 3000,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
@@ -42,7 +42,7 @@ const standardLimiter = rateLimit({
 
 const globalLimiter = rateLimit({
     windowMs,
-    max: isProd ? 200 : 60,
+    max: isProd ? 200 : 3000,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
