@@ -10,6 +10,16 @@ const send429 = (message, req, res) => {
     });
 };
 
+const loginLimiter = rateLimit({
+    windowMs,
+    max: isProd ? 10 : 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        send429('Demasiados intentos de inicio de sesión. Intente de nuevo en 15 minutos.', req, res);
+    }
+});
+
 const strictLimiter = rateLimit({
     windowMs,
     max: isProd ? 10 : 3000,
@@ -50,4 +60,4 @@ const globalLimiter = rateLimit({
     }
 });
 
-module.exports = { strictLimiter, mediumLimiter, standardLimiter, globalLimiter };
+module.exports = { loginLimiter, strictLimiter, mediumLimiter, standardLimiter, globalLimiter };

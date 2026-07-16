@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const { strictLimiter, mediumLimiter, standardLimiter, globalLimiter } = require('./middleware/rateLimiter');
+const { loginLimiter, strictLimiter, mediumLimiter, standardLimiter, globalLimiter } = require('./middleware/rateLimiter');
 const redis = require('./config/redis');
 
 // Base de datos y Modelos centralizados
@@ -86,10 +86,12 @@ io.on('connection', (socket) => {
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Rate Limiting por capas — Strict (auth / login)
-app.use('/api/auth', strictLimiter);
+// Rate Limiting por capas — Login (solo POST /login)
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth', standardLimiter);
 app.use('/api/auth', authRoutes);
-app.use('/api/client-portal', strictLimiter);
+app.use('/api/client-portal/login', loginLimiter);
+app.use('/api/client-portal', standardLimiter);
 app.use('/api/client-portal', clientPortalRoutes);
 
 // Medium (mutaciones / admin)
