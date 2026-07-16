@@ -335,137 +335,206 @@ class ReportService {
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', () => resolve(Buffer.concat(buffers)));
 
-        let y = this._drawHeader(doc, `Evento #${String(event.event_id).padStart(4, '0')}`, 'Confirmación y Detalles de Evento');
-        y += 16;
+        // ─── HEADER ───
+        const logoPath = path.join(__dirname, '../templates/logo2.png');
+        try { doc.image(logoPath, 450, 20, { fit: [80, 80], align: 'right' }); } catch (e) {}
 
-        // Client Details Section
-        doc.rect(50, y, 495, 28).fill('#f8f4ff');
-        doc.rect(50, y, 6, 28).fill('#8b5cf6');
-        doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
-        doc.text('Datos del Cliente', 66, y + 7);
-        y += 40;
+        doc.rect(50, 18, 495, 5).fill('#8b5cf6');
+
+        doc.fillColor('#18181b').fontSize(20).font('Helvetica-Bold');
+        doc.text('LA CASONA EVENTS', 50, 40);
+        doc.fillColor('#52525b').fontSize(9).font('Helvetica');
+        doc.text('Sistema Integrado de Gestión Empresarial', 50, 63);
+        doc.fillColor('#71717a').fontSize(8);
+        doc.text('RIF: J-XXXXXXXX-X  |  Tel: +58 412-XXX-XXXX  |  Email: lacasona@email.com', 50, 77);
+
+        doc.moveTo(50, 92).lineTo(545, 92).lineWidth(1).strokeColor('#d4d4d8').stroke();
+
+        // ─── TITLE ───
+        doc.fillColor('#8b5cf6').fontSize(16).font('Helvetica-Bold');
+        doc.text('CONTRATO DE PRESTACIÓN DE SERVICIOS', 50, 108, { align: 'center' });
+
+        const now = new Date();
+        const contractDate = now.toLocaleDateString('es-ES', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+        doc.fillColor('#18181b').fontSize(10).font('Helvetica');
+        doc.text(`Contrato N°: EVT-${String(event.event_id).padStart(4, '0')}-${now.getFullYear()}`, 50, 132);
+        doc.text(`Fecha de emisión: ${contractDate}`, 350, 132, { align: 'right' });
+
+        let y = 162;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(0.5).strokeColor('#d4d4d8').stroke();
+        y += 24;
+
+        // ─── COMPARECIENTES ───
+        doc.rect(50, y, 495, 28).fill('#f4f0ff');
+        doc.rect(50, y, 5, 28).fill('#8b5cf6');
+        doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
+        doc.text('COMPARECIENTES', 66, y + 8);
+        y += 42;
+
+        const cliente = event.Client || {};
+        const clienteName = `${cliente.name || ''} ${cliente.last_name || ''}`.trim() || 'N/A';
 
         doc.fontSize(9).font('Helvetica').fillColor('#27272a');
-        const client = event.Client || {};
-        const leftLabel = [
-          { label: 'Nombre', value: `${client.name || ''} ${client.last_name || ''}`.trim() || 'N/A' },
-          { label: 'Teléfono', value: client.phone || 'N/A' }
-        ];
-        const rightLabel = [
-          { label: 'Documento', value: client.doc_id || 'N/A' },
-          { label: 'Correo', value: client.email || 'N/A' }
-        ];
+        doc.text('Constituyen las partes intervinientes en el presente contrato, quienes se identifican a continuación:', 50, y, { width: 495, align: 'justify' });
+        y += 22;
 
-        leftLabel.forEach((item, i) => {
-          doc.fillColor('#71717a').font('Helvetica-Bold');
-          doc.text(item.label, 50, y + (i * 18));
-          doc.fillColor('#27272a').font('Helvetica');
-          doc.text(item.value, 130, y + (i * 18));
-        });
-        rightLabel.forEach((item, i) => {
-          doc.fillColor('#71717a').font('Helvetica-Bold');
-          doc.text(item.label, 300, y + (i * 18));
-          doc.fillColor('#27272a').font('Helvetica');
-          doc.text(item.value, 380, y + (i * 18));
-        });
+        // Box for each party
+        const boxW = 230;
+        doc.rect(50, y, boxW, 55).lineWidth(1).strokeColor('#d4d4d8');
+        doc.rect(50, y, boxW, 18).fill('#f4f0ff');
+        doc.fillColor('#8b5cf6').fontSize(8).font('Helvetica-Bold');
+        doc.text('EL CONTRATANTE', 55, y + 4);
+        doc.fillColor('#27272a').fontSize(8).font('Helvetica');
+        doc.text(`${clienteName}`, 55, y + 24);
+        doc.text(`C.I. / RIF: ${cliente.doc_id || 'N/A'}`, 55, y + 36);
+        doc.text(`Tel: ${cliente.phone || 'N/A'}`, 55, y + 46);
 
-        y += 56;
-        doc.moveTo(50, y).lineTo(545, y).lineWidth(1).strokeColor('#e4e4e7').stroke();
-        y += 16;
+        const boxX = 310;
+        doc.rect(boxX, y, boxW, 55).lineWidth(1).strokeColor('#d4d4d8');
+        doc.rect(boxX, y, boxW, 18).fill('#f4f0ff');
+        doc.fillColor('#8b5cf6').fontSize(8).font('Helvetica-Bold');
+        doc.text('EL CONTRATISTA', boxX + 5, y + 4);
+        doc.fillColor('#27272a').fontSize(8).font('Helvetica');
+        doc.text('LA CASONA EVENTS, C.A.', boxX + 5, y + 24);
+        doc.text('Representante: Dr. Isabel Parada', boxX + 5, y + 36);
+        doc.text('Propietaria', boxX + 5, y + 46);
 
-        // Event Details Section
-        doc.rect(50, y, 495, 28).fill('#f8f4ff');
-        doc.rect(50, y, 6, 28).fill('#8b5cf6');
-        doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
-        doc.text('Detalles del Evento', 66, y + 7);
-        y += 40;
+        y += 72;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(0.5).strokeColor('#d4d4d8').stroke();
+        y += 20;
+
+        // ─── CLAUSULAS ───
+        const drawClausula = (num, title, text, startY) => {
+          if (startY > 700) {
+            this._drawFooter(doc);
+            doc.addPage();
+            startY = 50;
+          }
+          doc.fillColor('#8b5cf6').fontSize(9.5).font('Helvetica-Bold');
+          doc.text(`CLÁUSULA ${num}. ${title}`, 50, startY);
+          startY += 16;
+          doc.fillColor('#27272a').fontSize(8.5).font('Helvetica');
+          doc.text(text, 50, startY, { width: 495, align: 'justify', lineGap: 3 });
+          const h = doc.heightOfString(text, { width: 495, align: 'justify', lineGap: 3 });
+          startY += h + 18;
+          return startY;
+        };
 
         let startDate = 'N/A', endDate = 'N/A';
         try {
-            startDate = new Date(event.start_date).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
-            endDate = new Date(event.end_date).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
+          startDate = new Date(event.start_date).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
+          endDate = new Date(event.end_date).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
         } catch(e) {}
 
         const venueName = event.Venues && event.Venues.length > 0
           ? event.Venues.map(v => v.name).join(', ')
           : (event.Venue?.name || 'N/A');
 
-        const eventFields = [
-          { label: 'Tipo de Evento', value: event.type_event || 'N/A' },
-          { label: 'Salón(es)', value: venueName },
-          { label: 'Inicio', value: startDate },
-          { label: 'Fin', value: endDate },
-        ];
+        const servicesText = event.EventItems && event.EventItems.length > 0
+          ? event.EventItems.map(item => {
+              const svc = item.ServiceExternal;
+              return `• ${svc?.name || 'Servicio'} (${svc?.service_type || 'General'})`;
+            }).join('\n')
+          : 'No se contrataron servicios externos adicionales.';
 
-        eventFields.forEach((field, i) => {
-          const col = i % 2 === 0 ? 50 : 300;
-          const row = Math.floor(i / 2);
-          doc.fillColor('#71717a').font('Helvetica-Bold').fontSize(9);
-          doc.text(field.label, col, y + (row * 18));
-          doc.fillColor('#27272a').font('Helvetica').fontSize(9);
-          doc.text(field.value, col + 100, y + (row * 18), { width: 150 });
-        });
+        y = drawClausula('PRIMERA', 'OBJETO DEL CONTRATO',
+          'El presente contrato tiene por objeto la prestación de servicios integrales de organización, ' +
+          'coordinación y realización del evento social descrito en la Cláusula Segunda, por parte de ' +
+          'LA CASONA EVENTS, C.A. (en adelante "EL CONTRATISTA") al cliente arriba identificado ' +
+          '(en adelante "EL CONTRATANTE"), quien solicita dichos servicios de manera voluntaria y formal.', y);
 
-        y += 56;
-        doc.moveTo(50, y).lineTo(545, y).lineWidth(1).strokeColor('#e4e4e7').stroke();
-        y += 16;
+        y = drawClausula('SEGUNDA', 'DESCRIPCIÓN DEL EVENTO',
+          `EL CONTRATISTA se compromete a realizar el evento descrito a continuación:\n\n` +
+          `  Tipo de Evento: ${event.type_event || 'N/A'}\n` +
+          `  Salón(es): ${venueName}\n` +
+          `  Fecha y Hora de Inicio: ${startDate}\n` +
+          `  Fecha y Hora de Fin: ${endDate}\n` +
+          `  Número de Invitados: ${event.guests || 'No especificado'}\n\n` +
+          `El evento se llevará a cabo en las instalaciones de LA CASONA, ubicadas en la ciudad de Barquisimeto, Estado Lara.`, y);
 
-        // Services Section
-        doc.rect(50, y, 495, 28).fill('#f8f4ff');
-        doc.rect(50, y, 6, 28).fill('#8b5cf6');
-        doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
-        doc.text('Servicios Contratados', 66, y + 7);
-        y += 40;
+        y = drawClausula('TERCERA', 'SERVICIOS CONTRATADOS',
+          'Los servicios adicionales contratados para el evento son los siguientes:\n\n' + servicesText + '\n\n' +
+          'Cualquier servicio adicional no contemplado en esta cláusula deberá ser solicitado por escrito ' +
+          'y estará sujeto a disponibilidad y costos adicionales.', y);
 
-        if (event.EventItems && event.EventItems.length > 0) {
-          event.EventItems.forEach((item, idx) => {
-            const svc = item.ServiceExternal;
-            if (idx % 2 === 0) {
-              doc.rect(50, y - 2, 495, 22).fill('#fafafa');
-            }
-            doc.circle(58, y + 6, 2.5).fill('#8b5cf6');
-            doc.fillColor('#27272a').fontSize(9).font('Helvetica');
-            doc.text(`${svc?.name || 'Servicio'}`, 68, y + 1);
-            doc.fillColor('#71717a').fontSize(8);
-            doc.text(svc?.service_type || 'General', 68, y + 12);
-            y += 24;
-          });
-        } else {
-          doc.fontSize(9).font('Helvetica-Oblique').fillColor('#71717a');
-          doc.text('No hay servicios externos contratados para este evento.', 50, y);
-          y += 22;
+        y = drawClausula('CUARTA', 'OBLIGACIONES DEL CONTRATANTE',
+          'Son obligaciones de EL CONTRATANTE:\n\n' +
+          '1. Pagar el monto total acordado por los servicios en la forma y plazos establecidos.\n' +
+          '2. Proporcionar la información necesaria para la organización del evento.\n' +
+          '3. Cumplir con las normas de conducta y horarios establecidos en las instalaciones.\n' +
+          '4. Notificar cualquier cambio en los detalles del evento con al menos 72 horas de antelación.\n' +
+          '5. Responder por cualquier daño material causado a las instalaciones durante el evento.', y);
+
+        y = drawClausula('QUINTA', 'OBLIGACIONES DEL CONTRATISTA',
+          'Son obligaciones de EL CONTRATISTA:\n\n' +
+          '1. Prestar los servicios contratados con la mayor diligencia y profesionalismo.\n' +
+          '2. Proveer el personal necesario para la correcta ejecución del evento.\n' +
+          '3. Mantener las instalaciones en óptimas condiciones de limpieza y operatividad.\n' +
+          '4. Cumplir con los horarios acordados para el inicio y finalización del evento.\n' +
+          '5. Responder por la calidad de los servicios ofrecidos.', y);
+
+        y = drawClausula('SEXTA', 'CONDICIONES DE PAGO',
+          'EL CONTRATANTE se compromete a cancelar la totalidad de los servicios contratados de acuerdo a ' +
+          'las siguientes condiciones:\n\n' +
+          '• El monto total será facturado al momento de la confirmación del evento.\n' +
+          '• Se podrán realizar pagos parciales según lo acordado con la administración.\n' +
+          '• El pago total debe completarse antes de la fecha del evento.\n' +
+          '• En caso de mora, se aplicarán los intereses establecidos en la legislación vigente.', y);
+
+        y = drawClausula('SÉPTIMA', 'POLÍTICA DE CANCELACIÓN',
+          'En caso de cancelación del evento por parte de EL CONTRATANTE:\n\n' +
+          '• Cancelación con más de 15 días de anticipación: reembolso del 80% del monto pagado.\n' +
+          '• Cancelación entre 7 y 15 días de anticipación: reembolso del 50% del monto pagado.\n' +
+          '• Cancelación con menos de 7 días de anticipación: no hay reembolso.\n' +
+          '• LA CASONA se reserva el derecho de cancelar el evento por caso fortuito o fuerza mayor, ' +
+          'realizando el reembolso total de los montos pagados.', y);
+
+        y = drawClausula('OCTAVA', 'ACEPTACIÓN',
+          'Las partes declaran que han leído y comprenden el contenido del presente contrato, y lo aceptan ' +
+          'en todas sus partes. En señal de conformidad, firman el presente documento en la ciudad de ' +
+          `Barquisimeto, a los ${now.getDate()} días del mes de ${now.toLocaleString('es-ES', { month: 'long' })} ` +
+          `del año ${now.getFullYear()}.`, y);
+
+        // ─── SIGNATURES ───
+        y += 10;
+        if (y > 680) {
+          this._drawFooter(doc);
+          doc.addPage();
+          y = 50;
         }
 
-        y += 20;
-        doc.moveTo(50, y).lineTo(545, y).lineWidth(1).strokeColor('#e4e4e7').stroke();
-        y += 24;
+        doc.moveTo(50, y).lineTo(545, y).lineWidth(0.5).strokeColor('#d4d4d8').stroke();
+        y += 16;
 
-        // Signature Section
-        doc.rect(50, y, 495, 28).fill('#f8f4ff');
-        doc.rect(50, y, 6, 28).fill('#8b5cf6');
-        doc.fillColor('#18181b').fontSize(12).font('Helvetica-Bold');
-        doc.text('Firmas', 66, y + 7);
+        doc.rect(50, y, 495, 26).fill('#f4f0ff');
+        doc.rect(50, y, 5, 26).fill('#8b5cf6');
+        doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
+        doc.text('FIRMAS', 66, y + 7);
         y += 50;
 
-        // Left: Owner signature
+        // Left: Owner
         doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
-        doc.text('Dr. Isabel Parada', 50, y);
-        doc.fillColor('#71717a').fontSize(9).font('Helvetica');
-        doc.text('Propietaria - La Casona Eventos', 50, y + 14);
+        doc.text('Dr. Isabel Parada', 55, y);
+        doc.fillColor('#71717a').fontSize(8).font('Helvetica');
+        doc.text('Propietaria - LA CASONA EVENTS, C.A.', 55, y + 14);
+        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica');
+        doc.text('C.I. / RIF: Representante Legal', 55, y + 26);
+        doc.moveTo(55, y + 48).lineTo(260, y + 48).lineWidth(1).strokeColor('#18181b').stroke();
+        doc.fillColor('#71717a').fontSize(8).font('Helvetica-Oblique');
+        doc.text('Firma de la Propietaria', 55, y + 52);
 
-        doc.moveTo(50, y + 40).lineTo(240, y + 40).lineWidth(1).strokeColor('#18181b').stroke();
-        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica-Oblique');
-        doc.text('Firma de la Propietaria', 50, y + 44);
-
-        // Right: Client signature
+        // Right: Client
         doc.fillColor('#18181b').fontSize(10).font('Helvetica-Bold');
-        doc.text(`${event.Client?.name || 'Cliente'} ${event.Client?.last_name || ''}`.trim(), 310, y);
-        doc.fillColor('#71717a').fontSize(9).font('Helvetica');
-        doc.text('Cliente', 310, y + 14);
-
-        doc.moveTo(310, y + 40).lineTo(500, y + 40).lineWidth(1).strokeColor('#18181b').stroke();
-        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica-Oblique');
-        doc.text('Firma del Cliente', 310, y + 44);
+        doc.text(clienteName, 310, y);
+        doc.fillColor('#71717a').fontSize(8).font('Helvetica');
+        doc.text('Cliente - CONTRATANTE', 310, y + 14);
+        doc.fillColor('#a1a1aa').fontSize(8).font('Helvetica');
+        doc.text(`C.I. / RIF: ${cliente.doc_id || 'N/A'}`, 310, y + 26);
+        doc.moveTo(310, y + 48).lineTo(515, y + 48).lineWidth(1).strokeColor('#18181b').stroke();
+        doc.fillColor('#71717a').fontSize(8).font('Helvetica-Oblique');
+        doc.text('Firma del Cliente', 310, y + 52);
 
         this._drawFooter(doc);
         doc.end();
