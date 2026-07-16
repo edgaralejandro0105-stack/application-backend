@@ -5,15 +5,30 @@ const AppError = require('../utils/AppError');
 class UserService {
   async getAllUsers(query = {}) {
     const { Op } = require('sequelize');
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
     const whereCondition = query.deleted === 'true' 
       ? { is_active: false } 
       : { is_active: { [Op.not]: false } };
 
-    return await User.findAll({
+    if (query.search) {
+      whereCondition[Op.or] = [
+        { name: { [Op.iLike]: `%${query.search}%` } },
+        { email: { [Op.iLike]: `%${query.search}%` } }
+      ];
+    }
+
+    const result = await User.findAndCountAll({
       where: whereCondition,
+      limit,
+      offset,
       attributes: { exclude: ['password'] },
       include: [{ model: Role, attributes: ['role_name', 'access'] }]
     });
+
+    return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 
   async getUserById(id) {

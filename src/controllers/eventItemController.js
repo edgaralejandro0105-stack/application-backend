@@ -7,7 +7,7 @@ exports.createEventItem = catchAsync(async (req, res) => {
 });
 
 exports.getAllEventItems = catchAsync(async (req, res) => {
-  const items = await eventItemService.getAllEventItems();
+  const items = await eventItemService.getAllEventItems(req.query);
   res.status(200).json(items);
 });
 

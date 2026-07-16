@@ -10,14 +10,22 @@ class ServiceExternalService {
   }
 
   async getAllServiceExternal(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
     const whereCondition = query.deleted === 'true'
       ? { is_active: false }
       : { is_active: true };
-      
-    return await ServiceExternal.findAll({ 
+
+    const result = await ServiceExternal.findAndCountAll({
       where: whereCondition,
-      order: [['service_id', 'DESC']] 
+      limit,
+      offset,
+      order: [['service_id', 'DESC']]
     });
+
+    return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 
   async getServiceExternalById(id) {

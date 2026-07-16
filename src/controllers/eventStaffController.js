@@ -7,7 +7,7 @@ exports.createEventStaff = catchAsync(async (req, res) => {
 });
 
 exports.getAllEventStaff = catchAsync(async (req, res) => {
-  const staff = await eventStaffService.getAllEventStaff();
+  const staff = await eventStaffService.getAllEventStaff(req.query);
   res.status(200).json(staff);
 });
 

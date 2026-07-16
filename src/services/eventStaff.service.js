@@ -6,12 +6,25 @@ class EventStaffService {
     return await EventStaff.create(data);
   }
 
-  async getAllEventStaff() {
-    return await EventStaff.findAll({
+  async getAllEventStaff(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const where = {};
+    if (query.event_id) where.event_id = query.event_id;
+    if (query.employee_id) where.employee_id = query.employee_id;
+
+    const result = await EventStaff.findAndCountAll({
+      where,
+      limit,
+      offset,
       include: [
         { model: Employee, attributes: ['first_name', 'last_name', 'phone'] }
       ]
     });
+
+    return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 
   async getEventStaffById(id) {

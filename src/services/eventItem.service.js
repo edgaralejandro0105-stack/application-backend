@@ -12,8 +12,23 @@ class EventItemService {
     return await EventItem.create(data);
   }
 
-  async getAllEventItems() {
-    return await EventItem.findAll({ include: [{ model: ServiceExternal, attributes: ['name', 'service_type'] }] });
+  async getAllEventItems(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const where = {};
+    if (query.event_id) where.event_id = query.event_id;
+    if (query.service_id) where.service_id = query.service_id;
+
+    const result = await EventItem.findAndCountAll({
+      where,
+      limit,
+      offset,
+      include: [{ model: ServiceExternal, attributes: ['name', 'service_type'] }]
+    });
+
+    return { total: result.count, page, limit, totalPages: Math.ceil(result.count / limit), data: result.rows };
   }
 
   async getEventItemById(id) {
