@@ -23,7 +23,10 @@ async function getTransporter() {
     },
     family: 4, // Forza el uso de IPv4
     lookup: (hostname, options, callback) => {
-      require('dns').lookup(hostname, { family: 4 }, callback);
+      require('dns').resolve4(hostname, (err, addresses) => {
+        if (err) return callback(err);
+        callback(null, addresses[0], 4);
+      });
     },
     connectionTimeout: 10000, // 10 segundos max para conectar
     greetingTimeout: 10000,   // 10 segundos max para el saludo SMTP
