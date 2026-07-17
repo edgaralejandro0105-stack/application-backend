@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { sequelize, Sale, SaleDetail, Product, Employee } = require('../models');
+const { sequelize, Sale, SaleDetail, Product, Employee, Event } = require('../models');
 const AppError = require('../utils/AppError');
 const { invalidateTags } = require('../utils/cacheInvalidator');
 
@@ -55,7 +55,7 @@ class SaleService {
     const where = {};
     if (query.event_id) where.event_id = query.event_id;
 
-    const options = { where, limit, offset, order: [['create_at', 'DESC']] };
+    const options = { where, limit, offset, order: [['create_at', 'DESC']], include: [{ model: Event, attributes: ['title', 'start_date', 'type_event'] }] };
     if (query.includeDeleted === 'true') options.paranoid = false;
 
     const result = await Sale.findAndCountAll(options);

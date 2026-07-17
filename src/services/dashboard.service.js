@@ -46,7 +46,7 @@ class DashboardService {
 
     const canViewEvents = isAdmin || ['Gerente', 'Ventas', 'Staff'].includes(userRole);
     const canViewClients = isAdmin || ['Gerente', 'Ventas'].includes(userRole);
-    const canViewInventory = isAdmin || ['Gerente'].includes(userRole);
+    const canViewInventory = isAdmin || ['Gerente', 'Ventas'].includes(userRole);
     const canViewSales = isAdmin || ['Gerente', 'Ventas'].includes(userRole);
 
     const now = new Date();
