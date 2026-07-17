@@ -12,8 +12,12 @@ const store = new Map();
 const LOGIN_MAX = 5;
 const LOGIN_WINDOW = 15 * 60 * 1000;
 
+function getIp(req) {
+    return req.ip || req.connection?.remoteAddress || 'unknown';
+}
+
 function loginLimiter(req, res, next) {
-    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+    const ip = getIp(req);
     const now = Date.now();
 
     if (!store.has(ip)) {
@@ -28,18 +32,22 @@ function loginLimiter(req, res, next) {
         return;
     }
 
-    timestamps.push(now);
     next();
 }
 
-setInterval(() => {
+function recordFailedAttempt(ip) {
     const now = Date.now();
-    for (const [ip, timestamps] of store) {
-        const valid = timestamps.filter(t => now - t < LOGIN_WINDOW);
-        if (valid.length === 0) store.delete(ip);
-        else store.set(ip, valid);
+    if (!store.has(ip)) {
+        store.set(ip, []);
     }
-}, 60000);
+    const timestamps = store.get(ip).filter(t => now - t < LOGIN_WINDOW);
+    timestamps.push(now);
+    store.set(ip, timestamps);
+}
+
+function clearAttempts(ip) {
+    store.delete(ip);
+}
 
 const mediumLimiter = rateLimit({
     windowMs,
@@ -71,4 +79,13 @@ const globalLimiter = rateLimit({
     }
 });
 
-module.exports = { loginLimiter, mediumLimiter, standardLimiter, globalLimiter };
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of store) {
+        const valid = timestamps.filter(t => now - t < LOGIN_WINDOW);
+        if (valid.length === 0) store.delete(ip);
+        else store.set(ip, valid);
+    }
+}, 60000);
+
+module.exports = { loginLimiter, mediumLimiter, standardLimiter, globalLimiter, recordFailedAttempt, clearAttempts };

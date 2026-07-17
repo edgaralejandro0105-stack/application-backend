@@ -1,5 +1,6 @@
 const authService = require('../services/auth.service');
 const catchAsync = require('../utils/catchAsync');
+const { recordFailedAttempt, clearAttempts } = require('../middleware/rateLimiter');
 
 exports.register = catchAsync(async (req, res) => {
   const { user, token, refreshToken } = await authService.register(req.body);
@@ -20,21 +21,28 @@ exports.register = catchAsync(async (req, res) => {
 
 exports.login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const { user, token, refreshToken } = await authService.login(email, password);
-  
-  res.status(200).json({
-    message: 'Inicio de sesión exitoso',
-    user: {
-      user_id: user.user_id,
-      name: user.name,
-      email: user.email,
-      role_id: user.role_id,
-      status: user.status,
-      Role: user.Role
-    },
-    token,
-    refreshToken
-  });
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+
+  try {
+    const { user, token, refreshToken } = await authService.login(email, password);
+    clearAttempts(ip);
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      user: {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        role_id: user.role_id,
+        status: user.status,
+        Role: user.Role
+      },
+      token,
+      refreshToken
+    });
+  } catch (error) {
+    recordFailedAttempt(ip);
+    throw error;
+  }
 });
 
 exports.logout = catchAsync(async (req, res) => {

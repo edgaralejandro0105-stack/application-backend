@@ -1,21 +1,29 @@
 const clientAuthService = require('../services/clientAuth.service');
 const catchAsync = require('../utils/catchAsync');
+const { recordFailedAttempt, clearAttempts } = require('../middleware/rateLimiter');
 
 exports.login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const { client, token } = await clientAuthService.login(email, password);
-  
-  res.status(200).json({
-    message: 'Inicio de sesión exitoso',
-    client: {
-      client_id: client.client_id,
-      name: client.name,
-      last_name: client.last_name,
-      email: client.email,
-      doc_id: client.doc_id
-    },
-    token
-  });
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+
+  try {
+    const { client, token } = await clientAuthService.login(email, password);
+    clearAttempts(ip);
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      client: {
+        client_id: client.client_id,
+        name: client.name,
+        last_name: client.last_name,
+        email: client.email,
+        doc_id: client.doc_id
+      },
+      token
+    });
+  } catch (error) {
+    recordFailedAttempt(ip);
+    throw error;
+  }
 });
 
 exports.getMyEvents = catchAsync(async (req, res) => {
