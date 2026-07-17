@@ -55,6 +55,18 @@ exports.getProfile = catchAsync(async (req, res) => {
   res.status(200).json(user);
 });
 
+exports.generateResetToken = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const result = await authService.generateResetToken(email);
+  res.status(200).json({
+    message: 'Token generado exitosamente',
+    data: {
+      token: result.token,
+      nombre_usuario: result.nombre_usuario,
+    },
+  });
+});
+
 exports.forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
   await authService.forgotPassword(email);

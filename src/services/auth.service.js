@@ -125,6 +125,23 @@ class AuthService {
     return user;
   }
 
+  async generateResetToken(email) {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new AppError('El correo no está registrado en el sistema', 404);
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.reset_password_token = resetToken;
+    user.reset_password_expires = new Date(Date.now() + 15 * 60000);
+    await user.save();
+
+    return {
+      token: resetToken,
+      nombre_usuario: user.name,
+    };
+  }
+
   async forgotPassword(email) {
     const user = await User.findOne({ where: { email } });
     if (!user) {
